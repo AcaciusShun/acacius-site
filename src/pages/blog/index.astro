@@ -1,0 +1,47 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+---
+
+<PageLayout title="Blog" description="Essays, notes, and working logs.">
+  <section class="container" style="padding-top: var(--space-16);">
+    <p class="hero-eyebrow">Writing</p>
+    <h1 class="hero-heading">Blog</h1>
+    <p class="hero-desc">Tech notes, daily thoughts, reading notes, and more.</p>
+
+    <div class="placeholder">
+      <p>Content coming soon — migration in progress.</p>
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  .hero-eyebrow {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-xs);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-tertiary);
+  }
+
+  .hero-heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .hero-desc {
+    margin: var(--space-4) 0 var(--space-12);
+    color: var(--color-ink-secondary);
+    font-size: var(--text-lg);
+  }
+
+  .placeholder {
+    padding: var(--space-16) var(--space-8);
+    text-align: center;
+    color: var(--color-ink-tertiary);
+    border: 1px dashed var(--color-rule);
+    border-radius: var(--radius-lg);
+  }
+</style>

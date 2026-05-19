@@ -1,0 +1,26 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Header from "@/components/layout/Header.astro";
+import Footer from "@/components/layout/Footer.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <Header />
+  <main class="page-main">
+    <slot />
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .page-main {
+    min-height: calc(100dvh - 64px - 120px);
+  }
+</style>

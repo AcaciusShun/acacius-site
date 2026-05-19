@@ -1,0 +1,95 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+---
+
+<PageLayout title="About" description="Builder, writer, and systems designer.">
+  <section class="about container">
+    <p class="about__eyebrow">About</p>
+    <h1 class="about__title">Somlar</h1>
+
+    <div class="about__content">
+      <p class="about__lead">
+        Builder, writer, and systems designer.
+      </p>
+      <p>
+        Working at the intersection of technology and narrative systems.
+        Building things that are useful, writing things that are honest,
+        and designing systems that last.
+      </p>
+      <p>
+        This site is a calm home for experiments, writing, and projects —
+        built to stay useful over time.
+      </p>
+    </div>
+
+    <div class="about__links">
+      <a href="https://github.com/bailongctui" class="about__link">GitHub</a>
+      <a href="mailto:contact@somlar.com" class="about__link">Email</a>
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  .about {
+    padding-top: var(--space-24);
+    padding-bottom: var(--space-16);
+    max-width: var(--prose-max);
+  }
+
+  .about__eyebrow {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-xs);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-tertiary);
+  }
+
+  .about__title {
+    margin: 0 0 var(--space-8);
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .about__content {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+    color: var(--color-ink-secondary);
+  }
+
+  .about__content p {
+    margin: 0 0 var(--space-6);
+  }
+
+  .about__lead {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    color: var(--color-ink);
+    font-weight: 500;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .about__links {
+    display: flex;
+    gap: var(--space-6);
+    margin-top: var(--space-8);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .about__link {
+    font-size: var(--text-sm);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--color-rule);
+    transition: border-color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .about__link:hover {
+    border-color: var(--color-accent);
+  }
+</style>

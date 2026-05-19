@@ -1,0 +1,251 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+---
+
+<PageLayout>
+  <section class="hero container">
+    <p class="hero__eyebrow">Personal Study</p>
+    <h1 class="hero__title">
+      Still writing,<br />
+      still building.
+    </h1>
+    <p class="hero__subtitle">
+      Experiments, essays, and selected work — from one clear starting point.
+    </p>
+  </section>
+
+  <section class="sections container animate-stagger-in">
+    <div class="sections__grid">
+      <!-- Latest Writing -->
+      <div class="section-card section-card--wide">
+        <div class="section-card__header">
+          <span class="section-card__index">01</span>
+          <h2 class="section-card__title">Latest</h2>
+        </div>
+        <p class="section-card__desc">Recent essays, notes, and working logs.</p>
+        <ul class="section-card__list">
+          <li class="section-card__item">
+            <span class="section-card__item-title">Coming soon</span>
+            <span class="section-card__item-meta">Migrating content...</span>
+          </li>
+        </ul>
+        <a class="section-card__cta" href="/blog">
+          Read all
+          <span class="section-card__arrow" aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <!-- Projects -->
+      <div class="section-card">
+        <div class="section-card__header">
+          <span class="section-card__index">02</span>
+          <h2 class="section-card__title">Projects</h2>
+        </div>
+        <p class="section-card__desc">Selected builds and references.</p>
+        <a class="section-card__cta" href="/projects">
+          View work
+          <span class="section-card__arrow" aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <!-- Labs -->
+      <div class="section-card">
+        <div class="section-card__header">
+          <span class="section-card__index">03</span>
+          <h2 class="section-card__title">Labs</h2>
+        </div>
+        <p class="section-card__desc">Experiments, prototypes, and small demos.</p>
+        <a class="section-card__cta" href="/labs">
+          Explore
+          <span class="section-card__arrow" aria-hidden="true"></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container" aria-hidden="true">
+    <span class="divider__ornament">&#x2736;</span>
+  </div>
+</PageLayout>
+
+<style>
+  /* ─── Hero ─── */
+
+  .hero {
+    padding-top: var(--space-24);
+    padding-bottom: var(--space-16);
+  }
+
+  .hero__eyebrow {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-xs);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-tertiary);
+  }
+
+  .hero__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, var(--text-5xl));
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+
+  .hero__subtitle {
+    margin: var(--space-6) 0 0;
+    max-width: 48ch;
+    font-size: var(--text-lg);
+    line-height: 1.75;
+    color: var(--color-ink-secondary);
+  }
+
+  /* ─── Section Cards ─── */
+
+  .sections {
+    padding-bottom: var(--space-16);
+  }
+
+  .sections__grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: var(--space-4);
+  }
+
+  .section-card {
+    position: relative;
+    padding: var(--space-8) var(--space-6);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-rule);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--duration-normal) var(--ease-smooth),
+                box-shadow var(--duration-normal) var(--ease-smooth),
+                border-color var(--duration-normal) var(--ease-smooth);
+  }
+
+  .section-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-rule-strong);
+  }
+
+  .section-card--wide {
+    grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .section-card__header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .section-card__index {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-ink-tertiary);
+    letter-spacing: 0.08em;
+  }
+
+  .section-card__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+
+  .section-card__desc {
+    margin: 0 0 var(--space-4);
+    color: var(--color-ink-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.7;
+  }
+
+  .section-card__list {
+    list-style: none;
+    margin: 0 0 var(--space-6);
+    padding: 0;
+    flex: 1;
+  }
+
+  .section-card__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .section-card__item-title {
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+  }
+
+  .section-card__item-meta {
+    font-size: var(--text-xs);
+    color: var(--color-ink-tertiary);
+    letter-spacing: 0.04em;
+  }
+
+  .section-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-top: auto;
+  }
+
+  .section-card__arrow {
+    display: inline-block;
+    width: 16px;
+    height: 1px;
+    background: currentColor;
+    transition: transform var(--duration-fast) var(--ease-smooth);
+  }
+
+  .section-card:hover .section-card__arrow {
+    transform: translateX(5px);
+  }
+
+  /* ─── Divider ─── */
+
+  .divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: var(--space-12);
+  }
+
+  .divider__ornament {
+    font-size: var(--text-sm);
+    color: var(--color-ink-tertiary);
+    opacity: 0.5;
+  }
+
+  /* ─── Responsive ─── */
+
+  @media (max-width: 768px) {
+    .hero {
+      padding-top: var(--space-16);
+      padding-bottom: var(--space-12);
+    }
+
+    .sections__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .section-card--wide {
+      grid-row: auto;
+    }
+  }
+</style>
