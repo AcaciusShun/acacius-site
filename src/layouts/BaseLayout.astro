@@ -30,6 +30,15 @@ const pageDescription = description ?? siteConfig.description;
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
+    <script is:inline>
+      (function () {
+        var t = localStorage.getItem("theme");
+        if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -40,14 +49,5 @@ const pageDescription = description ?? siteConfig.description;
   </head>
   <body>
     <slot />
-
-    <script is:inline>
-      (function () {
-        const theme = localStorage.getItem("theme");
-        if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-          document.documentElement.classList.add("dark");
-        }
-      })();
-    </script>
   </body>
 </html>

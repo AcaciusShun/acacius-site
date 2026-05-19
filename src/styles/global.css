@@ -112,8 +112,14 @@ body {
   line-height: 1.7;
   color: var(--color-ink);
   background-color: var(--color-bg);
+}
+
+/* Only animate theme changes triggered by user toggle, not on page load */
+body.theme-transition,
+body.theme-transition * {
   transition: background-color var(--duration-slow) var(--ease-smooth),
-              color var(--duration-slow) var(--ease-smooth);
+              color var(--duration-slow) var(--ease-smooth),
+              border-color var(--duration-slow) var(--ease-smooth);
 }
 
 a {
