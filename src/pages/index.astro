@@ -1,5 +1,9 @@
 ---
 import PageLayout from "@/layouts/PageLayout.astro";
+import { getPublishedPosts, formatDate, postSlug } from "@/lib/blog";
+
+const posts = await getPublishedPosts();
+const latestPosts = posts.slice(0, 4);
 ---
 
 <PageLayout>
@@ -24,10 +28,14 @@ import PageLayout from "@/layouts/PageLayout.astro";
         </div>
         <p class="section-card__desc">Recent essays, notes, and working logs.</p>
         <ul class="section-card__list">
-          <li class="section-card__item">
-            <span class="section-card__item-title">Coming soon</span>
-            <span class="section-card__item-meta">Migrating content...</span>
-          </li>
+          {latestPosts.map((post) => (
+            <li class="section-card__item">
+              <a class="section-card__item-link" href={`/blog/${postSlug(post)}`}>
+                <span class="section-card__item-title">{post.data.title}</span>
+                <span class="section-card__item-meta">{formatDate(post.data.date)}</span>
+              </a>
+            </li>
+          ))}
         </ul>
         <a class="section-card__cta" href="/blog">
           Read all
@@ -176,22 +184,41 @@ import PageLayout from "@/layouts/PageLayout.astro";
   }
 
   .section-card__item {
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .section-card__item-link {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    gap: var(--space-3);
     padding: var(--space-3) 0;
-    border-bottom: 1px solid var(--color-rule);
+    transition: padding-left var(--duration-fast) var(--ease-smooth);
+  }
+
+  .section-card__item-link:hover {
+    padding-left: var(--space-1);
   }
 
   .section-card__item-title {
     font-size: var(--text-sm);
     color: var(--color-ink);
+    transition: color var(--duration-fast) var(--ease-smooth);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .section-card__item-link:hover .section-card__item-title {
+    color: var(--color-accent);
   }
 
   .section-card__item-meta {
     font-size: var(--text-xs);
     color: var(--color-ink-tertiary);
     letter-spacing: 0.04em;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .section-card__cta {
