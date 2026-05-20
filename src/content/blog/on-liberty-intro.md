@@ -4,7 +4,7 @@ date: 2022-06-01
 slug: "on-liberty-intro"
 tags: ["Reading-Notes"]
 cover:
-  image: "/images/notebook.jpg"
+  image: "https://cdn.somlar.com/2026/05/476e815da4aaf5f2bc1cd88e0e6e6302.jpg"
   alt: ""
 ---
 

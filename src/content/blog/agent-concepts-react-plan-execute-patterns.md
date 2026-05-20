@@ -6,7 +6,7 @@ slug: "agent-concepts-react-plan-execute-patterns"
 description: "介绍 AI Agent 的概念与原理，拆解 ReAct 与 Plan-and-Execute 两种主流模式，并列举其他较少用或过时的模式及其缺点。"
 tags: ["AI", "Agent", "ReAct", "LLM", "科普"]
 cover:
-  image: "/covers/agent-concepts-react-plan-execute-patterns-cover.png"
+  image: "https://cdn.somlar.com/2026/05/09eed25cab7fee7a0dccf8d0e18b0c8e.png"
   alt: "Agent Patterns: ReAct 与 Plan-and-Execute 架构示意图"
 ---
 

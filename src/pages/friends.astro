@@ -1,0 +1,195 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import { Icon } from "astro-icon/components";
+
+const friends = [
+  {
+    name: "Pantheon",
+    url: "https://blog.pantheon.press/",
+    desc: "A blog about ideas and observations.",
+  },
+  {
+    name: "Mivansaka",
+    url: "https://mivansaka.com",
+    desc: "Personal site and blog.",
+  },
+];
+---
+
+<PageLayout title="Friends" description="Les amis sont la famille que nous choisissons.">
+  <section class="friends container">
+    <header class="friends__header">
+      <p class="friends__eyebrow">Connections</p>
+      <h1 class="friends__title">Friends</h1>
+      <p class="friends__quote">
+        Les amis sont la famille que nous choisissons.
+      </p>
+    </header>
+
+    <ul class="friends__list animate-stagger-in">
+      {friends.map((f) => (
+        <li class="friend">
+          <a href={f.url} class="friend__link" target="_blank" rel="noopener">
+            <span class="friend__avatar" aria-hidden="true">
+              {f.name.charAt(0)}
+            </span>
+            <div class="friend__info">
+              <span class="friend__name">{f.name}</span>
+              {f.desc && <span class="friend__desc">{f.desc}</span>}
+            </div>
+            <Icon name="lucide:external-link" class="friend__icon" />
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <aside class="friends__note">
+      <p>If you maintain a quiet, long-lived personal space, feel free to exchange links.</p>
+    </aside>
+  </section>
+</PageLayout>
+
+<style>
+  .friends {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+    max-width: var(--prose-max);
+  }
+
+  .friends__header {
+    margin-bottom: var(--space-12);
+  }
+
+  .friends__eyebrow {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-xs);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-tertiary);
+  }
+
+  .friends__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .friends__quote {
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-lg);
+    color: var(--color-ink-secondary);
+  }
+
+  /* ─── List ─── */
+
+  .friends__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .friend {
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-md);
+    transition: border-color var(--duration-fast) var(--ease-smooth),
+                box-shadow var(--duration-fast) var(--ease-smooth);
+  }
+
+  .friend:hover {
+    border-color: var(--color-rule-strong);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .friend__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .friend__avatar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .friend__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .friend__name {
+    font-weight: 500;
+    font-size: var(--text-base);
+    color: var(--color-ink);
+  }
+
+  .friend__desc {
+    font-size: var(--text-sm);
+    color: var(--color-ink-tertiary);
+  }
+
+  .friend__icon {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    color: var(--color-ink-tertiary);
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-smooth);
+  }
+
+  .friend:hover .friend__icon {
+    opacity: 1;
+  }
+
+  /* ─── Note ─── */
+
+  .friends__note {
+    margin-top: var(--space-12);
+    padding: var(--space-4) var(--space-6);
+    border-left: 3px solid var(--color-accent);
+    background: var(--color-blockquote-bg);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  .friends__note p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--color-ink-secondary);
+    font-style: italic;
+  }
+
+  /* ─── Responsive ─── */
+
+  @media (max-width: 640px) {
+    .friends {
+      padding-top: var(--space-8);
+    }
+
+    .friends__title {
+      font-size: var(--text-3xl);
+    }
+
+    .friend__link {
+      padding: var(--space-3) var(--space-4);
+    }
+  }
+</style>

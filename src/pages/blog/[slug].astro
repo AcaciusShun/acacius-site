@@ -40,6 +40,11 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
           ))}
         </div>
       )}
+      {post.data.cover && (
+        <figure class="article__cover">
+          <img src={post.data.cover.image} alt={post.data.cover.alt} />
+        </figure>
+      )}
     </header>
 
     <div class="article__body">
@@ -169,6 +174,20 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
     color: var(--color-ink-tertiary);
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-sm);
+  }
+
+  /* ─── Cover ─── */
+
+  .article__cover {
+    max-width: var(--prose-max);
+    margin: var(--space-8) 0 0;
+  }
+
+  .article__cover img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-rule);
   }
 
   /* ─── Body with TOC ─── */
