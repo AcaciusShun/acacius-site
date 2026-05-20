@@ -1,0 +1,160 @@
+---
+import { siteConfig } from "@/lib/config";
+
+interface Props {
+  path: string;
+}
+
+const { path } = Astro.props;
+const envId = siteConfig.twikoo.envId;
+---
+
+{envId && (
+  <section class="comments" id="comments">
+    <div class="comments__divider" aria-hidden="true" />
+    <h2 class="comments__title">Comments</h2>
+    <div id="tcomment" />
+  </section>
+)}
+
+<script define:vars={{ envId, path }}>
+  if (envId) {
+    const initTwikoo = () => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/twikoo@1.7.9/dist/twikoo.min.js";
+      script.onload = () => {
+        twikoo.init({
+          envId,
+          el: "#tcomment",
+          path,
+          lang: "zh-CN",
+        });
+      };
+      document.head.appendChild(script);
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initTwikoo);
+    } else {
+      initTwikoo();
+    }
+  }
+</script>
+
+<style is:global>
+  .comments {
+    max-width: var(--prose-max);
+    margin-top: var(--space-16);
+  }
+
+  .comments__divider {
+    width: 40px;
+    height: 1px;
+    background: var(--color-rule-strong);
+    margin-bottom: var(--space-6);
+  }
+
+  .comments__title {
+    margin: 0 0 var(--space-8);
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  /* ─── Twikoo theme overrides ─── */
+
+  .tk-comments {
+    font-family: var(--font-body);
+  }
+
+  /* Input & editor */
+  .tk-input .el-input__inner,
+  .tk-input .el-textarea__inner {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    background: var(--color-bg-warm);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-sm);
+  }
+
+  .tk-input .el-input__inner:focus,
+  .tk-input .el-textarea__inner:focus {
+    border-color: var(--color-accent);
+  }
+
+  /* Submit button */
+  .tk-submit .tk-send-btn {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    transition: background var(--duration-fast) var(--ease-smooth);
+  }
+
+  .tk-submit .tk-send-btn:hover {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
+
+  /* Comment cards */
+  .tk-comment {
+    border-bottom: 1px solid var(--color-rule);
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .tk-content {
+    color: var(--color-ink-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.7;
+  }
+
+  .tk-nick {
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  .tk-time {
+    color: var(--color-ink-tertiary);
+    font-size: var(--text-xs);
+  }
+
+  .tk-action-icon {
+    color: var(--color-ink-tertiary);
+  }
+
+  .tk-action-icon:hover {
+    color: var(--color-accent);
+  }
+
+  /* Avatar */
+  .tk-avatar {
+    border-radius: var(--radius-full);
+  }
+
+  /* Counts & meta */
+  .tk-comments-count {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+  }
+
+  /* Dark mode overrides */
+  .dark .tk-input .el-input__inner,
+  .dark .tk-input .el-textarea__inner {
+    background: var(--color-bg-elevated);
+    border-color: var(--color-rule);
+    color: var(--color-ink);
+  }
+
+  .dark .tk-content {
+    color: var(--color-ink-secondary);
+  }
+
+  .dark .tk-comment {
+    border-bottom-color: var(--color-rule);
+  }
+</style>

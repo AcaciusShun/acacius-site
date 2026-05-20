@@ -9,4 +9,7 @@ export const siteConfig = {
     { label: "Labs", href: "/labs" },
     { label: "About", href: "/about" },
   ],
+  twikoo: {
+    envId: import.meta.env.PUBLIC_TWIKOO_ENV_ID || "",
+  },
 } as const;

@@ -12,6 +12,10 @@ const year = new Date().getFullYear();
       <span class="footer__copy">&copy; {year}</span>
     </div>
     <div class="footer__right">
+      <a class="footer__link" href="/friends">Friends</a>
+      <span class="footer__divider" aria-hidden="true">&middot;</span>
+      <a class="footer__link" href="/rss.xml">RSS</a>
+      <span class="footer__divider" aria-hidden="true">&middot;</span>
       <span>Crafted with intention</span>
     </div>
   </div>
@@ -51,7 +55,21 @@ const year = new Date().getFullYear();
     color: var(--color-ink-secondary);
   }
 
+  .footer__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
   .footer__divider {
     color: var(--color-rule-strong);
+  }
+
+  .footer__link {
+    transition: color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .footer__link:hover {
+    color: var(--color-accent);
   }
 </style>
