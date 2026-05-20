@@ -1,5 +1,6 @@
 ---
 import PageLayout from "@/layouts/PageLayout.astro";
+import { Icon } from "astro-icon/components";
 ---
 
 <PageLayout title="About" description="Builder, writer, and systems designer.">
@@ -23,8 +24,18 @@ import PageLayout from "@/layouts/PageLayout.astro";
     </div>
 
     <div class="about__links">
-      <a href="https://github.com/bailongctui" class="about__link">GitHub</a>
-      <a href="mailto:contact@somlar.com" class="about__link">Email</a>
+      <a href="https://github.com/AcaciusShun" class="about__link" aria-label="GitHub" target="_blank" rel="noopener">
+        <Icon name="simple-icons:github" />
+      </a>
+      <a href="https://x.com/hey_akie" class="about__link" aria-label="X (Twitter)" target="_blank" rel="noopener">
+        <Icon name="simple-icons:x" />
+      </a>
+      <a href="https://m.somincola.org/@acacius" class="about__link" aria-label="Mastodon" target="_blank" rel="me noopener">
+        <Icon name="simple-icons:mastodon" />
+      </a>
+      <a href="mailto:contact@somlar.com" class="about__link" aria-label="Email">
+        <Icon name="lucide:mail" />
+      </a>
     </div>
   </section>
 </PageLayout>
@@ -73,23 +84,35 @@ import PageLayout from "@/layouts/PageLayout.astro";
 
   .about__links {
     display: flex;
-    gap: var(--space-6);
+    align-items: center;
+    gap: var(--space-4);
     margin-top: var(--space-8);
     padding-top: var(--space-8);
     border-top: 1px solid var(--color-rule);
   }
 
   .about__link {
-    font-size: var(--text-sm);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-accent);
-    padding-bottom: 2px;
-    border-bottom: 1px solid var(--color-rule);
-    transition: border-color var(--duration-fast) var(--ease-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--color-ink-tertiary);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-full);
+    transition: color var(--duration-fast) var(--ease-smooth),
+                border-color var(--duration-fast) var(--ease-smooth),
+                background-color var(--duration-fast) var(--ease-smooth);
   }
 
   .about__link:hover {
+    color: var(--color-accent);
     border-color: var(--color-accent);
+    background: var(--color-accent-subtle);
+  }
+
+  .about__link :global(svg) {
+    width: 16px;
+    height: 16px;
   }
 </style>
