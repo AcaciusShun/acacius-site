@@ -108,6 +108,7 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 body {
@@ -118,6 +119,7 @@ body {
   line-height: 1.7;
   color: var(--color-ink);
   background-color: var(--color-bg);
+  overflow-x: hidden;
 }
 
 /* Only animate theme changes triggered by user toggle, not on page load */

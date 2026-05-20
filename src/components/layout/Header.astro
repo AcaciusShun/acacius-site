@@ -72,6 +72,7 @@ import ThemeToggle from "@/components/interactive/ThemeToggle.astro";
     align-items: center;
     justify-content: space-between;
     height: 64px;
+    min-width: 0;
   }
 
   .header__brand {
@@ -81,6 +82,10 @@ import ThemeToggle from "@/components/interactive/ThemeToggle.astro";
     letter-spacing: 0.02em;
     color: var(--color-ink);
     transition: color var(--duration-fast) var(--ease-smooth);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
   }
 
   .header__brand:hover {
