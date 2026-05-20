@@ -9,7 +9,7 @@ import ThemeToggle from "@/components/interactive/ThemeToggle.astro";
       {siteConfig.title}
     </a>
 
-    <nav class="header__nav" aria-label="Primary">
+    <nav class="header__nav" id="nav" aria-label="Primary">
       {siteConfig.nav.map((item) => (
         <a
           class:list={["header__link", { "header__link--active": Astro.url.pathname.startsWith(item.href) }]}
@@ -18,10 +18,43 @@ import ThemeToggle from "@/components/interactive/ThemeToggle.astro";
           {item.label}
         </a>
       ))}
-      <ThemeToggle />
     </nav>
+
+    <div class="header__actions">
+      <ThemeToggle />
+      <button
+        class="header__burger"
+        id="nav-toggle"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="nav"
+      >
+        <span class="header__burger-line" />
+        <span class="header__burger-line" />
+      </button>
+    </div>
   </div>
 </header>
+
+<script is:inline>
+  (function () {
+    var btn = document.getElementById("nav-toggle");
+    var nav = document.getElementById("nav");
+    if (!btn || !nav) return;
+    btn.addEventListener("click", function () {
+      var open = nav.classList.toggle("header__nav--open");
+      btn.setAttribute("aria-expanded", String(open));
+      btn.classList.toggle("header__burger--open", open);
+    });
+    nav.addEventListener("click", function (e) {
+      if (e.target.closest("a")) {
+        nav.classList.remove("header__nav--open");
+        btn.setAttribute("aria-expanded", "false");
+        btn.classList.remove("header__burger--open");
+      }
+    });
+  })();
+</script>
 
 <style>
   .header {
@@ -53,6 +86,8 @@ import ThemeToggle from "@/components/interactive/ThemeToggle.astro";
   .header__brand:hover {
     color: var(--color-accent);
   }
+
+  /* ─── Desktop Nav ─── */
 
   .header__nav {
     display: flex;
@@ -91,13 +126,89 @@ import ThemeToggle from "@/components/interactive/ThemeToggle.astro";
     width: 100%;
   }
 
+  /* ─── Actions (theme toggle + burger) ─── */
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  /* ─── Burger (hidden on desktop) ─── */
+
+  .header__burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .header__burger-line {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background: var(--color-ink);
+    border-radius: 1px;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+
+  .header__burger--open .header__burger-line:first-child {
+    transform: translateY(3.25px) rotate(45deg);
+  }
+
+  .header__burger--open .header__burger-line:last-child {
+    transform: translateY(-3.25px) rotate(-45deg);
+  }
+
+  /* ─── Mobile ─── */
+
   @media (max-width: 640px) {
     .header__nav {
-      gap: var(--space-4);
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-rule);
+      padding: 0 var(--space-6);
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+    }
+
+    .header__nav--open {
+      max-height: 300px;
+      opacity: 1;
+      padding: var(--space-4) var(--space-6);
     }
 
     .header__link {
-      font-size: var(--text-xs);
+      font-size: var(--text-base);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-rule);
+      letter-spacing: 0.04em;
+    }
+
+    .header__link:last-child {
+      border-bottom: none;
+    }
+
+    .header__link::after {
+      display: none;
+    }
+
+    .header__burger {
+      display: flex;
     }
   }
 </style>

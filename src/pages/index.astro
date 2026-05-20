@@ -323,4 +323,40 @@ const latestPosts = posts.slice(0, 4);
       grid-row: auto;
     }
   }
+
+  @media (max-width: 480px) {
+    .hero {
+      padding-top: var(--space-12);
+      padding-bottom: var(--space-8);
+    }
+
+    .hero__title {
+      font-size: var(--text-3xl);
+    }
+
+    .hero__subtitle {
+      font-size: var(--text-base);
+    }
+
+    .section-card {
+      padding: var(--space-6) var(--space-4);
+    }
+
+    .section-card__title {
+      font-size: var(--text-2xl);
+    }
+
+    .section-card__item-link {
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .section-card__item-meta {
+      align-self: flex-start;
+    }
+
+    .sections {
+      padding-bottom: var(--space-16);
+    }
+  }
 </style>
