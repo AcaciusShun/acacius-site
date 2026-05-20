@@ -12,15 +12,23 @@ const { title, description } = Astro.props;
 ---
 
 <BaseLayout title={title} description={description}>
-  <Header />
-  <main class="page-main">
-    <slot />
-  </main>
-  <Footer />
+  <div class="page-shell">
+    <Header />
+    <main class="page-main">
+      <slot />
+    </main>
+    <Footer />
+  </div>
 </BaseLayout>
 
 <style>
+  .page-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
   .page-main {
-    min-height: calc(100dvh - 64px - 120px);
+    flex: 1;
   }
 </style>

@@ -50,8 +50,22 @@ const latestPosts = posts.slice(0, 4);
           <h2 class="section-card__title">Projects</h2>
         </div>
         <p class="section-card__desc">Selected builds and references.</p>
+        <ul class="section-card__tags-list">
+          <li class="section-card__tags-item">
+            <span class="section-card__tags-name">Somlar</span>
+            <span class="section-card__tags-tech">Astro · TypeScript</span>
+          </li>
+          <li class="section-card__tags-item">
+            <span class="section-card__tags-name">Somincola</span>
+            <span class="section-card__tags-tech">Ruby · Docker</span>
+          </li>
+          <li class="section-card__tags-item">
+            <span class="section-card__tags-name">News Center</span>
+            <span class="section-card__tags-tech">Python · FastAPI</span>
+          </li>
+        </ul>
         <a class="section-card__cta" href="/projects">
-          View work
+          View all
           <span class="section-card__arrow" aria-hidden="true"></span>
         </a>
       </div>
@@ -71,9 +85,10 @@ const latestPosts = posts.slice(0, 4);
     </div>
   </section>
 
-  <div class="divider container" aria-hidden="true">
-    <span class="divider__ornament">&#x2736;</span>
-  </div>
+  <footer class="colophon container">
+    <div class="colophon__rule" aria-hidden="true" />
+    <p class="colophon__text">A calm space for writing, building, and thinking.</p>
+  </footer>
 </PageLayout>
 
 <style>
@@ -113,7 +128,7 @@ const latestPosts = posts.slice(0, 4);
   /* ─── Section Cards ─── */
 
   .sections {
-    padding-bottom: var(--space-16);
+    padding-bottom: var(--space-24);
   }
 
   .sections__grid {
@@ -244,19 +259,52 @@ const latestPosts = posts.slice(0, 4);
     transform: translateX(5px);
   }
 
-  /* ─── Divider ─── */
+  /* ─── Project Tags ─── */
 
-  .divider {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-block: var(--space-12);
+  .section-card__tags-list {
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
   }
 
-  .divider__ornament {
+  .section-card__tags-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .section-card__tags-name {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  .section-card__tags-tech {
+    font-size: var(--text-xs);
+    color: var(--color-ink-tertiary);
+    font-family: var(--font-mono);
+  }
+
+  /* ─── Colophon ─── */
+
+  .colophon {
+    padding-bottom: var(--space-16);
+  }
+
+  .colophon__rule {
+    width: 40px;
+    height: 1px;
+    background: var(--color-rule-strong);
+    margin-bottom: var(--space-4);
+  }
+
+  .colophon__text {
+    margin: 0;
     font-size: var(--text-sm);
     color: var(--color-ink-tertiary);
-    opacity: 0.5;
+    font-style: italic;
   }
 
   /* ─── Responsive ─── */
