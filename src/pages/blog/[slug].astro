@@ -18,7 +18,14 @@ const body = (post as any).body ?? "";
 const tocHeadings = headings.filter((h) => h.depth <= 3);
 ---
 
-<PageLayout title={post.data.title} description={post.data.description}>
+<PageLayout
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+  ogImage={post.data.cover?.image}
+  publishedTime={post.data.date.toISOString()}
+  tags={post.data.tags}
+>
   <div class="progress-bar" id="progress-bar"></div>
 
   <article class="article container">

@@ -6,12 +6,16 @@ import Footer from "@/components/layout/Footer.astro";
 interface Props {
   title?: string;
   description?: string;
+  ogType?: "website" | "article";
+  ogImage?: string;
+  publishedTime?: string;
+  tags?: string[];
 }
 
-const { title, description } = Astro.props;
+const { title, description, ...seoProps } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} {...seoProps}>
   <div class="page-shell">
     <Header />
     <main class="page-main">

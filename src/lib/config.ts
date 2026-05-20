@@ -1,6 +1,6 @@
 export const siteConfig = {
   title: "Somlar",
-  description: "A calm home for experiments, writing, and projects.",
+  description: "Somlar 的个人站点 — 技术笔记、开源项目与实验记录。",
   url: "https://somlar.com",
   author: "Somlar",
   nav: [
