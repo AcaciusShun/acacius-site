@@ -1,0 +1,168 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Header from "@/components/layout/Header.astro";
+---
+
+<BaseLayout title="404 — Not Found">
+  <div class="page-shell">
+    <Header />
+    <main class="lost">
+      <canvas id="dust" class="lost__canvas"></canvas>
+      <div class="lost__content">
+        <span class="lost__code">404</span>
+        <h1 class="lost__title">Page not found</h1>
+        <p class="lost__desc">
+          The page you're looking for has drifted away — like dust in an empty study.
+        </p>
+        <a class="lost__back" href="/">Return home</a>
+      </div>
+    </main>
+  </div>
+</BaseLayout>
+
+<script is:inline>
+(function () {
+  var canvas = document.getElementById("dust");
+  if (!canvas) return;
+  var ctx = canvas.getContext("2d");
+  var particles = [];
+  var count = 60;
+
+  function resize() {
+    canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
+    canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  }
+
+  function init() {
+    resize();
+    particles = [];
+    var w = canvas.offsetWidth;
+    var h = canvas.offsetHeight;
+    for (var i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 2 + 0.5,
+        dx: (Math.random() - 0.5) * 0.3,
+        dy: (Math.random() - 0.5) * 0.15 - 0.1,
+        opacity: Math.random() * 0.5 + 0.1,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  function draw() {
+    var w = canvas.offsetWidth;
+    var h = canvas.offsetHeight;
+    ctx.clearRect(0, 0, w, h);
+
+    var isDark = document.documentElement.classList.contains("dark");
+    var base = isDark ? "196,149,106" : "139,98,67";
+
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.x += p.dx + Math.sin(p.phase + Date.now() * 0.0008) * 0.15;
+      p.y += p.dy;
+      p.phase += 0.002;
+
+      if (p.x < -10) p.x = w + 10;
+      if (p.x > w + 10) p.x = -10;
+      if (p.y < -10) p.y = h + 10;
+      if (p.y > h + 10) p.y = -10;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(" + base + "," + p.opacity + ")";
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  init();
+  draw();
+  window.addEventListener("resize", init);
+})();
+</script>
+
+<style>
+  .page-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  .lost {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .lost__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .lost__content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: var(--space-8);
+  }
+
+  .lost__code {
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 20vw, 12rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--color-rule);
+    user-select: none;
+  }
+
+  .lost__title {
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .lost__desc {
+    margin: var(--space-3) auto 0;
+    max-width: 36ch;
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--color-ink-secondary);
+  }
+
+  .lost__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-8);
+    padding: var(--space-2) var(--space-6);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-full);
+    transition: background var(--duration-fast) var(--ease-smooth),
+                color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .lost__back:hover {
+    background: var(--color-accent);
+    color: #fff;
+  }
+</style>

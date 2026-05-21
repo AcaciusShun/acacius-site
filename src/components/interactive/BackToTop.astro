@@ -1,0 +1,81 @@
+<button
+  class="btt"
+  id="back-to-top"
+  aria-label="Back to top"
+  title="Back to top"
+>
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 13V3M3 7l5-5 5 5" />
+  </svg>
+</button>
+
+<script is:inline>
+(function () {
+  var btn = document.getElementById("back-to-top");
+  if (!btn) return;
+  var visible = false;
+
+  function toggle() {
+    var show = window.scrollY > 400;
+    if (show !== visible) {
+      visible = show;
+      btn.classList.toggle("btt--visible", show);
+    }
+  }
+
+  var ticking = false;
+  window.addEventListener("scroll", function () {
+    if (!ticking) {
+      requestAnimationFrame(function () {
+        toggle();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  btn.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  toggle();
+})();
+</script>
+
+<style>
+  .btt {
+    position: fixed;
+    bottom: var(--space-6);
+    right: var(--space-6);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--color-rule-strong);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-elevated);
+    color: var(--color-ink-secondary);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity var(--duration-normal) var(--ease-smooth),
+                transform var(--duration-normal) var(--ease-smooth),
+                color var(--duration-fast) var(--ease-smooth),
+                border-color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .btt--visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .btt:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+</style>

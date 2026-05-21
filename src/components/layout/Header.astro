@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from "@/lib/config";
 import ThemeToggle from "@/components/interactive/ThemeToggle.astro";
+import SearchDialog from "@/components/interactive/SearchDialog.astro";
 ---
 
 <header class="header" transition:persist>
@@ -21,6 +22,7 @@ import ThemeToggle from "@/components/interactive/ThemeToggle.astro";
     </nav>
 
     <div class="header__actions">
+      <SearchDialog />
       <ThemeToggle />
       <button
         class="header__burger"

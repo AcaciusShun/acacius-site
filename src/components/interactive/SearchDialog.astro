@@ -1,0 +1,300 @@
+<button class="search-trigger" id="search-trigger" aria-label="Search">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="7" cy="7" r="4.5" />
+    <path d="M10.5 10.5 14 14" />
+  </svg>
+</button>
+
+<dialog class="search-dialog" id="search-dialog">
+  <div class="search-dialog__inner">
+    <div class="search-dialog__header">
+      <div class="search-dialog__input-wrap">
+        <svg class="search-dialog__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="7" cy="7" r="4.5" />
+          <path d="M10.5 10.5 14 14" />
+        </svg>
+        <input
+          class="search-dialog__input"
+          id="search-input"
+          type="search"
+          placeholder="Search posts..."
+          autocomplete="off"
+        />
+      </div>
+      <button class="search-dialog__close" id="search-close" aria-label="Close search">
+        <kbd>Esc</kbd>
+      </button>
+    </div>
+    <div class="search-dialog__results" id="search-results"></div>
+    <div class="search-dialog__footer">
+      <span>Powered by <a href="https://pagefind.app" target="_blank" rel="noopener">Pagefind</a></span>
+    </div>
+  </div>
+</dialog>
+
+<script is:inline>
+(function () {
+  var trigger = document.getElementById("search-trigger");
+  var dialog = document.getElementById("search-dialog");
+  var input = document.getElementById("search-input");
+  var results = document.getElementById("search-results");
+  var closeBtn = document.getElementById("search-close");
+  var pagefind = null;
+  var debounceTimer = null;
+
+  function open() {
+    dialog.showModal();
+    input.value = "";
+    results.innerHTML = "";
+    input.focus();
+    loadPagefind();
+  }
+
+  function close() {
+    dialog.close();
+  }
+
+  async function loadPagefind() {
+    if (pagefind) return;
+    try {
+      pagefind = await import("/pagefind/pagefind.js");
+      await pagefind.init();
+    } catch (e) {
+      results.innerHTML = '<p class="search-empty">Search index not available in dev mode.</p>';
+    }
+  }
+
+  async function search(query) {
+    if (!pagefind || !query.trim()) {
+      results.innerHTML = query.trim()
+        ? '<p class="search-empty">Loading...</p>'
+        : '';
+      return;
+    }
+
+    var res = await pagefind.search(query);
+    if (res.results.length === 0) {
+      results.innerHTML = '<p class="search-empty">No results found.</p>';
+      return;
+    }
+
+    var items = await Promise.all(res.results.slice(0, 8).map(function (r) { return r.data(); }));
+    var html = '<ul class="search-list">';
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      html += '<li class="search-item">';
+      html += '<a class="search-item__link" href="' + item.url + '">';
+      html += '<span class="search-item__title">' + item.meta.title + '</span>';
+      html += '<span class="search-item__excerpt">' + item.excerpt + '</span>';
+      html += '</a></li>';
+    }
+    html += '</ul>';
+    results.innerHTML = html;
+  }
+
+  trigger.addEventListener("click", open);
+  closeBtn.addEventListener("click", close);
+
+  dialog.addEventListener("click", function (e) {
+    if (e.target === dialog) close();
+  });
+
+  input.addEventListener("input", function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function () {
+      search(input.value);
+    }, 200);
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      e.preventDefault();
+      if (dialog.open) close(); else open();
+    }
+  });
+})();
+</script>
+
+<style>
+  /* ─── Trigger Button ─── */
+
+  .search-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-full);
+    color: var(--color-ink-secondary);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-smooth),
+                border-color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .search-trigger:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  /* ─── Dialog ─── */
+
+  .search-dialog {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: 560px;
+    max-height: min(80vh, 520px);
+    margin: 12vh auto auto;
+    padding: 0;
+    border: 1px solid var(--color-rule-strong);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+
+  .search-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+  }
+
+  .search-dialog__inner {
+    display: flex;
+    flex-direction: column;
+    max-height: min(80vh, 520px);
+  }
+
+  /* ─── Header ─── */
+
+  .search-dialog__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .search-dialog__input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .search-dialog__icon {
+    flex-shrink: 0;
+    color: var(--color-ink-tertiary);
+  }
+
+  .search-dialog__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-ink);
+    outline: none;
+  }
+
+  .search-dialog__input::placeholder {
+    color: var(--color-ink-tertiary);
+  }
+
+  .search-dialog__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-ink-tertiary);
+  }
+
+  .search-dialog__close kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    border: 1px solid var(--color-rule);
+    border-radius: 4px;
+    color: var(--color-ink-tertiary);
+  }
+
+  /* ─── Results ─── */
+
+  .search-dialog__results {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-2);
+  }
+
+  :global(.search-list) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  :global(.search-item__link) {
+    display: block;
+    padding: var(--space-3) var(--space-3);
+    border-radius: var(--radius-md);
+    transition: background var(--duration-fast) var(--ease-smooth);
+  }
+
+  :global(.search-item__link:hover) {
+    background: var(--color-accent-subtle);
+  }
+
+  :global(.search-item__title) {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    margin-bottom: 2px;
+  }
+
+  :global(.search-item__excerpt) {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--color-ink-secondary);
+    line-height: 1.5;
+  }
+
+  :global(.search-item__excerpt mark) {
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+    border-radius: 2px;
+    padding: 0 2px;
+  }
+
+  :global(.search-empty) {
+    text-align: center;
+    color: var(--color-ink-tertiary);
+    font-size: var(--text-sm);
+    padding: var(--space-8) var(--space-4);
+    margin: 0;
+  }
+
+  /* ─── Footer ─── */
+
+  .search-dialog__footer {
+    padding: var(--space-2) var(--space-4);
+    border-top: 1px solid var(--color-rule);
+    font-size: 0.65rem;
+    color: var(--color-ink-tertiary);
+    text-align: right;
+  }
+
+  .search-dialog__footer a {
+    color: var(--color-accent);
+  }
+
+  /* ─── Responsive ─── */
+
+  @media (max-width: 640px) {
+    .search-dialog {
+      max-width: calc(100% - var(--space-8));
+      margin-top: var(--space-8);
+    }
+  }
+</style>
