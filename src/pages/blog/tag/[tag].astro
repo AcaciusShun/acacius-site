@@ -1,0 +1,178 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import { getPublishedPosts, getAllTags, readingTime, formatDate, postSlug } from "@/lib/blog";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  const tags = getAllTags(posts);
+  return tags.map(({ tag }) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts.filter((p) => p.data.tags.includes(tag)),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<PageLayout title={`#${tag}`} description={`Posts tagged "${tag}".`}>
+  <section class="tag-page container">
+    <header class="tag-page__header">
+      <a class="tag-page__back" href="/blog">← Blog</a>
+      <h1 class="tag-page__title">#{tag}</h1>
+      <p class="tag-page__count">{posts.length} post{posts.length !== 1 ? "s" : ""}</p>
+    </header>
+
+    <ul class="post-list">
+      {posts.map((post) => {
+        const body = (post as any).body ?? "";
+        return (
+          <li class="post-item">
+            <a class="post-item__link" href={`/blog/${postSlug(post)}`}>
+              <div class="post-item__content">
+                <h2 class="post-item__title">{post.data.title}</h2>
+                <div class="post-item__meta">
+                  <time datetime={post.data.date.toISOString()}>
+                    {formatDate(post.data.date)}
+                  </time>
+                  <span class="post-item__dot" aria-hidden="true" />
+                  <span>{readingTime(body)}</span>
+                </div>
+              </div>
+              <span class="post-item__arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+</PageLayout>
+
+<style>
+  .tag-page {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+    max-width: var(--prose-max);
+  }
+
+  .tag-page__header {
+    margin-bottom: var(--space-8);
+  }
+
+  .tag-page__back {
+    display: inline-block;
+    margin-bottom: var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--color-accent);
+    transition: opacity var(--duration-fast) var(--ease-smooth);
+  }
+
+  .tag-page__back:hover {
+    opacity: 0.7;
+  }
+
+  .tag-page__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--color-accent);
+  }
+
+  .tag-page__count {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-sm);
+    color: var(--color-ink-tertiary);
+  }
+
+  /* ─── Post List (reused styles) ─── */
+
+  .post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .post-item {
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .post-item__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-6) 0;
+    transition: padding-left var(--duration-fast) var(--ease-smooth);
+  }
+
+  .post-item__link:hover {
+    padding-left: var(--space-2);
+  }
+
+  .post-item__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .post-item__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    line-height: 1.3;
+    transition: color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .post-item__link:hover .post-item__title {
+    color: var(--color-accent);
+  }
+
+  .post-item__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--color-ink-tertiary);
+  }
+
+  .post-item__dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--color-ink-tertiary);
+    opacity: 0.5;
+  }
+
+  .post-item__arrow {
+    flex-shrink: 0;
+    font-size: var(--text-lg);
+    color: var(--color-ink-tertiary);
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: all var(--duration-fast) var(--ease-smooth);
+  }
+
+  .post-item__link:hover .post-item__arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  @media (max-width: 640px) {
+    .tag-page {
+      padding-top: var(--space-8);
+    }
+
+    .tag-page__title {
+      font-size: var(--text-3xl);
+    }
+
+    .post-item__arrow {
+      display: none;
+    }
+  }
+</style>

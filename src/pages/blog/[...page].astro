@@ -31,14 +31,14 @@ const tags = getAllTags(posts);
 
     {tags.length > 0 && (
       <nav class="tags" aria-label="Filter by tag">
-        <button class="tags__item tags__item--active" data-tag="all">
-          All <span class="tags__count">{posts.length}</span>
-        </button>
         {tags.map(({ tag, count }) => (
-          <button class="tags__item" data-tag={tag}>
+          <a class="tags__item" href={`/blog/tag/${tag}`}>
             {tag} <span class="tags__count">{count}</span>
-          </button>
+          </a>
         ))}
+        <a class="tags__item tags__item--subtle" href="/blog/archives">
+          Archives
+        </a>
       </nav>
     )}
 
@@ -47,7 +47,7 @@ const tags = getAllTags(posts);
         const slug = postSlug(post);
         const body = (post as any).body ?? "";
         return (
-          <li class="post-item" data-tags={JSON.stringify(post.data.tags)}>
+          <li class="post-item">
             <a class="post-item__link" href={`/blog/${slug}`}>
               <div class="post-item__content">
                 <h2 class="post-item__title">{post.data.title}</h2>
@@ -103,28 +103,6 @@ const tags = getAllTags(posts);
   </section>
 </PageLayout>
 
-<script is:inline>
-  (function () {
-    var buttons = document.querySelectorAll(".tags__item");
-    var items = document.querySelectorAll(".post-item");
-    buttons.forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var tag = btn.dataset.tag;
-        buttons.forEach(function (b) { b.classList.remove("tags__item--active"); });
-        btn.classList.add("tags__item--active");
-        items.forEach(function (item) {
-          if (tag === "all") {
-            item.style.display = "";
-            return;
-          }
-          var tags = JSON.parse(item.dataset.tags || "[]");
-          item.style.display = tags.indexOf(tag) >= 0 ? "" : "none";
-        });
-      });
-    });
-  })();
-</script>
-
 <style>
   .blog {
     padding-top: var(--space-16);
@@ -175,12 +153,9 @@ const tags = getAllTags(posts);
     padding: var(--space-1) var(--space-3);
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-full);
-    background: transparent;
     color: var(--color-ink-secondary);
     font-size: var(--text-xs);
-    font-family: var(--font-body);
     letter-spacing: 0.03em;
-    cursor: pointer;
     transition: all var(--duration-fast) var(--ease-smooth);
   }
 
@@ -189,10 +164,9 @@ const tags = getAllTags(posts);
     color: var(--color-accent);
   }
 
-  .tags__item--active {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: #fff;
+  .tags__item--subtle {
+    border-style: dashed;
+    color: var(--color-ink-tertiary);
   }
 
   .tags__count {

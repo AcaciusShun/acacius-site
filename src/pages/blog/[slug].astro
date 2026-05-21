@@ -131,7 +131,120 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
   })();
 </script>
 
+<script is:inline>
+(function () {
+  // Code block copy button
+  document.querySelectorAll(".prose pre").forEach(function (pre) {
+    var btn = document.createElement("button");
+    btn.className = "code-copy";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    pre.style.position = "relative";
+    pre.appendChild(btn);
+    btn.addEventListener("click", function () {
+      var code = pre.querySelector("code");
+      var text = code ? code.textContent : pre.textContent;
+      navigator.clipboard.writeText(text || "").then(function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+      });
+    });
+  });
+
+  // Image lightbox
+  var overlay = document.createElement("div");
+  overlay.className = "lightbox";
+  overlay.innerHTML = '<img class="lightbox__img" />';
+  document.body.appendChild(overlay);
+  var lbImg = overlay.querySelector(".lightbox__img");
+
+  document.querySelectorAll(".prose img").forEach(function (img) {
+    img.style.cursor = "zoom-in";
+    img.addEventListener("click", function () {
+      lbImg.src = img.src;
+      lbImg.alt = img.alt;
+      overlay.classList.add("lightbox--open");
+      document.body.style.overflow = "hidden";
+    });
+  });
+
+  overlay.addEventListener("click", function () {
+    overlay.classList.remove("lightbox--open");
+    document.body.style.overflow = "";
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && overlay.classList.contains("lightbox--open")) {
+      overlay.classList.remove("lightbox--open");
+      document.body.style.overflow = "";
+    }
+  });
+})();
+</script>
+
 <style>
+  /* ─── Code Copy Button ─── */
+
+  .code-copy {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    padding: 2px var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--color-ink-tertiary);
+    background: var(--color-bg);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-smooth),
+                color var(--duration-fast) var(--ease-smooth);
+  }
+
+  :global(.prose pre:hover) .code-copy {
+    opacity: 1;
+  }
+
+  .code-copy:hover {
+    color: var(--color-accent);
+  }
+
+  /* ─── Lightbox ─── */
+
+  :global(.lightbox) {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    cursor: zoom-out;
+    transition: opacity var(--duration-normal) var(--ease-smooth);
+  }
+
+  :global(.lightbox--open) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  :global(.lightbox__img) {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: var(--radius-md);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+    transform: scale(0.95);
+    transition: transform var(--duration-normal) var(--ease-smooth);
+  }
+
+  :global(.lightbox--open .lightbox__img) {
+    transform: scale(1);
+  }
+
   /* ─── Progress Bar ─── */
 
   .progress-bar {
