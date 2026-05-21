@@ -3,9 +3,11 @@ import PageLayout from "@/layouts/PageLayout.astro";
 import { Icon } from "astro-icon/components";
 
 const skills = [
-  { group: "Frontend", items: ["TypeScript", "React", "Astro", "Tailwind CSS", "SwiftUI"] },
-  { group: "Backend", items: ["Node.js", "Python", "FastAPI", "Ruby"] },
-  { group: "Infrastructure", items: ["Docker", "Cloudflare", "GitHub Actions"] },
+  { group: "Frontend", items: ["TypeScript", "React", "Vue", "Next.js", "Astro", "React Native", "Expo", "HTML5", "CSS3"] },
+  { group: "Tooling", items: ["Vite", "Webpack", "Tailwind CSS"] },
+  { group: "Backend", items: ["Node.js", "Python", "FastAPI", "JavaScript"] },
+  { group: "Database", items: ["MongoDB", "Redis"] },
+  { group: "Infra", items: ["Docker", "Cloudflare", "GitHub Actions"] },
   { group: "Interests", items: ["Systems Design", "Typography", "RSS/Fediverse"] },
 ];
 
@@ -43,14 +45,14 @@ const timeline = [
       <h2 class="about__section-title">Stack</h2>
       <div class="skills">
         {skills.map((group) => (
-          <div class="skills__group">
+          <>
             <span class="skills__label">{group.group}</span>
             <div class="skills__tags">
               {group.items.map((item) => (
                 <span class="skills__tag">{item}</span>
               ))}
             </div>
-          </div>
+          </>
         ))}
       </div>
     </div>
@@ -158,25 +160,19 @@ const timeline = [
   /* ─── Skills ─── */
 
   .skills {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  .skills__group {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3) var(--space-6);
     align-items: baseline;
-    gap: var(--space-4);
   }
 
   .skills__label {
-    flex-shrink: 0;
-    width: 7em;
     font-size: var(--text-xs);
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-ink-tertiary);
+    white-space: nowrap;
   }
 
   .skills__tags {
@@ -268,13 +264,13 @@ const timeline = [
       font-size: var(--text-3xl);
     }
 
-    .skills__group {
-      flex-direction: column;
-      gap: var(--space-2);
+    .skills {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
     }
 
-    .skills__label {
-      width: auto;
+    .skills__tags {
+      margin-bottom: var(--space-3);
     }
   }
 </style>
