@@ -4,18 +4,23 @@ Personal site and digital study — built with [Astro 6](https://astro.build/), 
 
 **[somlar.com](https://somlar.com)**
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.somlar.com/2026/05/3453905c627e7c1b32053d5c24ea285e.png">
-  <img src="https://cdn.somlar.com/2026/05/4fdcb030683575bc2f2843b770c4c924.png" alt="Somlar — homepage preview">
-</picture>
+![Somlar — homepage preview](https://cdn.somlar.com/2026/06/0f2b3131e310789d3b3489a648605334.png)
 
 ## Features
 
 - **Digital Study design** — warm editorial palette with Cormorant Garamond + Inter, light ("日光书房") and dark ("灯下夜读") themes
-- **Blog** — 50+ posts with tag filtering, reading time, table of contents, and Shiki dual-theme syntax highlighting
+- **Blog** — 50+ posts with tag filtering, reading time, table of contents, a top reading-progress bar, code-copy buttons, image lightbox, and Shiki dual-theme syntax highlighting
+- **Library (书影音)** — a [NeoDB](https://neodb.social)-synced shelf of books, films, TV, music, games and podcasts:
+  - Cover grid ("书架") and month-by-month timeline ("时间轴") views
+  - Category filter (Books / Movies & TV / Music / Games / Podcasts) + a status sub-filter (看过 / 在看 / 想看)
+  - Click any item for a detail modal — your rating, community rating, review, synopsis, tags, and a link back to NeoDB
+  - `>!spoiler!<` markup rendered as reveal-on-hover blocks
+  - Data is fetched at **build time**; covers are downloaded and optimized to local WebP
 - **Projects** — curated showcase of personal and course work
 - **Labs** — space for experiments, prototypes, and small demos
 - **Friends** — blogroll / link exchange page
+- **Comments** — self-hosted [Twikoo](https://twikoo.js.org/) on blog posts
+- **Search** — full-text client search powered by [Pagefind](https://pagefind.app/)
 
 ## Tech Stack
 
@@ -26,33 +31,63 @@ Personal site and digital study — built with [Astro 6](https://astro.build/), 
 | Typography | Cormorant Garamond, Inter, JetBrains Mono |
 | Icons | astro-icon + Iconify (Simple Icons, Lucide) |
 | Syntax | Shiki (github-light / github-dark) |
+| Search | Pagefind |
+| Comments | Twikoo |
+| Library data | NeoDB API (build-time sync) |
 | Media | Cloudflare R2 CDN |
+
+## Configuration
+
+Environment variables live in `.env` (gitignored). Copy `.env.example` to `.env` and fill in:
+
+| Variable | Used by | Notes |
+|----------|---------|-------|
+| `PUBLIC_TWIKOO_ENV_ID` | Comments | Twikoo backend URL / env id. `PUBLIC_`-prefixed, so it's exposed to the client (required by the widget). |
+| `NEODB_TOKEN` | Library | NeoDB personal access token with **read** scope. **Build-time only — never shipped to the client.** Generate one at `https://<instance>/developer`. |
+| `NEODB_INSTANCE` | Library | NeoDB instance base URL. Defaults to `https://neodb.social`. |
+
+> When deploying, set these in your host's **build environment variables** — `.env` is never committed.
+
+### How the Library sync works
+
+`src/lib/neodb.ts` queries your marks at build time and renders them to static pages:
+
+- **Fetch** — pulls every shelf (`wishlist` / `progress` / `complete` / `dropped`) from `GET /api/me/shelf/{type}` (paginated, Bearer auth) and maps them to a typed `LibraryItem[]`.
+- **Cache** — stores the result on disk (`node_modules/.cache/neodb/`) so `astro dev` doesn't re-hit the API on every page load; `astro build` always refetches fresh.
+- **Covers** — downloads each cover, resizes it to WebP under `public/covers/` (served from your own domain), and falls back to the remote URL if a download fails.
+- **Resilience** — if `NEODB_TOKEN` is unset or a fetch fails, it falls back to bundled sample data so the build never breaks.
+
+To refresh the Library: mark items on NeoDB, then rebuild and redeploy.
 
 ## Development
 
 ```bash
 npm install
-npm run dev        # http://localhost:4322
-npm run build      # production build
-npm run preview    # preview production build
+npm run dev        # http://localhost:4321
+npm run build      # production build (fetches NeoDB + optimizes covers + indexes search)
+npm run preview    # preview the production build
 ```
 
 ## Project Structure
 
 ```
 src/
-├── content/blog/   # Markdown blog posts
-├── layouts/        # PageLayout wrapper
-├── components/     # Header, Footer, ThemeToggle
+├── content/blog/       # Markdown blog posts
+├── layouts/            # Base + Page layout wrappers
+├── components/
+│   ├── layout/         # Header, Footer
+│   ├── interactive/    # ThemeToggle, SearchDialog, TwikooComments, BackToTop
+│   └── content/        # MediaCover, RatingStars, LibraryModal
 ├── pages/
-│   ├── index.astro       # Homepage
-│   ├── blog/             # Blog list + [slug] detail
-│   ├── projects/         # Project showcase
-│   ├── labs/             # Experiments
-│   ├── friends.astro     # Blogroll
-│   └── about.astro       # About + social links
-├── lib/            # Blog utilities
-└── styles/         # Global CSS + design tokens
+│   ├── index.astro     # Homepage (+ "From the Library" strip)
+│   ├── blog/           # Blog list + [slug] detail
+│   ├── projects/       # Project showcase
+│   ├── labs/           # Experiments
+│   ├── library/        # 书影音 — NeoDB shelf + timeline
+│   ├── friends.astro   # Blogroll
+│   └── about.astro     # About + social links
+├── lib/                # Blog utilities, site config, NeoDB sync (neodb.ts)
+└── styles/             # Global CSS + design tokens
 ```
 
 ## License
