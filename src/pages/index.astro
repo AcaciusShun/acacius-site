@@ -5,6 +5,7 @@ import { fetchLibraryItems } from "@/lib/neodb";
 import MediaCover from "@/components/content/MediaCover.astro";
 import RatingStars from "@/components/content/RatingStars.astro";
 import LibraryModal from "@/components/content/LibraryModal.astro";
+import CategoryBadge from "@/components/content/CategoryBadge.astro";
 
 const posts = await getPublishedPosts();
 const latestPosts = posts.slice(0, 4);
@@ -118,6 +119,7 @@ const shelfLabel: Record<string, string> = {
           <a class="lately__item" href={it.url} target="_blank" rel="noopener" data-lib-open={it.uuid} aria-label={it.title}>
             <div class="lately__cover">
               <MediaCover title={it.title} category={it.category} cover={it.cover} />
+              <CategoryBadge category={it.category} />
             </div>
             <p class="lately__item-title">{it.title}</p>
             {it.rating ? (
@@ -424,6 +426,7 @@ const shelfLabel: Record<string, string> = {
   }
 
   .lately__cover {
+    position: relative;
     transition: transform var(--duration-normal) var(--ease-smooth);
   }
 

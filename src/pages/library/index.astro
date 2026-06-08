@@ -3,6 +3,7 @@ import PageLayout from "@/layouts/PageLayout.astro";
 import MediaCover from "@/components/content/MediaCover.astro";
 import RatingStars from "@/components/content/RatingStars.astro";
 import LibraryModal from "@/components/content/LibraryModal.astro";
+import CategoryBadge from "@/components/content/CategoryBadge.astro";
 import { fetchLibraryItems, type LibraryItem } from "@/lib/neodb";
 
 const libraryItems = await fetchLibraryItems();
@@ -159,6 +160,7 @@ function renderComment(text: string): string {
             <div class="lib-card__cover">
               <MediaCover title={it.title} category={it.category} cover={it.cover} />
               {it.shelf !== "complete" && <span class="lib-card__pill">{shelfPill[it.shelf]}</span>}
+              <CategoryBadge category={it.category} />
             </div>
             <div class="lib-card__meta">
               <h3 class="lib-card__title">{it.title}</h3>
