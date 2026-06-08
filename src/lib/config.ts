@@ -7,6 +7,7 @@ export const siteConfig = {
     { label: "Blog", href: "/blog" },
     { label: "Projects", href: "/projects" },
     { label: "Labs", href: "/labs" },
+    { label: "Library", href: "/library" },
     { label: "About", href: "/about" },
   ],
   twikoo: {

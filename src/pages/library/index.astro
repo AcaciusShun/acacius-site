@@ -1,0 +1,676 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import MediaCover from "@/components/content/MediaCover.astro";
+import RatingStars from "@/components/content/RatingStars.astro";
+import LibraryModal from "@/components/content/LibraryModal.astro";
+import { fetchLibraryItems, type LibraryItem } from "@/lib/neodb";
+
+const libraryItems = await fetchLibraryItems();
+
+const catLabel: Record<string, string> = {
+  book: "Book",
+  movie: "Film",
+  tv: "TV",
+  music: "Music",
+  game: "Game",
+  podcast: "Podcast",
+};
+
+const shelfPill: Record<string, string> = {
+  wishlist: "想看",
+  progress: "在看",
+  dropped: "弃",
+  complete: "",
+};
+
+// Category chips — keep only those present in the data
+const allCatChips = [
+  { key: "all", label: "All", cats: "" },
+  { key: "book", label: "Books", cats: "book" },
+  { key: "screen", label: "Movies & TV", cats: "movie,tv" },
+  { key: "music", label: "Music", cats: "music" },
+  { key: "game", label: "Games", cats: "game" },
+  { key: "podcast", label: "Podcasts", cats: "podcast" },
+];
+const presentCats = new Set(libraryItems.map((i) => i.category));
+const catChips = allCatChips.filter(
+  (c) => c.key === "all" || c.cats.split(",").some((x) => presentCats.has(x)),
+);
+
+// Status sub-filter — keep only shelves present in the data
+const allShelfChips = [
+  { key: "complete", label: "看过" },
+  { key: "progress", label: "在看" },
+  { key: "wishlist", label: "想看" },
+  { key: "dropped", label: "弃" },
+];
+const presentShelves = new Set(libraryItems.map((i) => i.shelf));
+const shelfChips = [
+  { key: "", label: "全部" },
+  ...allShelfChips.filter((s) => presentShelves.has(s.key)),
+];
+
+// Shelf grid — most recent first
+const grid = [...libraryItems].sort((a, b) => b.date.localeCompare(a.date));
+
+// Timeline — grouped by month, descending
+const byMonth = new Map<string, LibraryItem[]>();
+for (const it of grid) {
+  const key = it.date.slice(0, 7);
+  if (!byMonth.has(key)) byMonth.set(key, []);
+  byMonth.get(key)!.push(it);
+}
+const months = [...byMonth.entries()]
+  .sort((a, b) => b[0].localeCompare(a[0]))
+  .map(([key, items]) => {
+    const [y, m] = key.split("-");
+    return { key, label: `${y} 年 ${parseInt(m)} 月`, items };
+  });
+
+// Render NeoDB spoiler markup >!hidden!< into reveal-on-hover spans.
+// Escapes every text segment, so no user HTML is injected.
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+}
+function renderComment(text: string): string {
+  let out = "";
+  const re = />!([\s\S]*?)!</g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text))) {
+    out += escapeHtml(text.slice(last, m.index));
+    out += '<span class="spoiler">' + escapeHtml(m[1]) + "</span>";
+    last = re.lastIndex;
+  }
+  out += escapeHtml(text.slice(last));
+  return out;
+}
+---
+
+<PageLayout
+  title="Library"
+  description="书影音游 — what I've read, watched, listened to and played."
+>
+  <section class="lib container" id="lib" data-view="shelf">
+    <header class="lib__header">
+      <p class="lib__eyebrow">Collection</p>
+      <h1 class="lib__title">Library</h1>
+      <p class="lib__desc">
+        书影音游 — 读过、看过、听过、玩过的痕迹。数据同步自
+        <a href="https://neodb.social" target="_blank" rel="noopener">NeoDB</a>。
+      </p>
+    </header>
+
+    <div class="lib__controls">
+      <div class="lib__search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="7" cy="7" r="4.5"></circle>
+          <path d="M10.5 10.5 14 14"></path>
+        </svg>
+        <input id="lib-search" type="search" placeholder="搜索标题或短评…" autocomplete="off" />
+      </div>
+
+      <div class="lib__chips" id="lib-cats">
+        {catChips.map((c, i) => (
+          <button class:list={["lib__chip", { "is-active": i === 0 }]} data-cats={c.cats}>
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div class="lib__views">
+        <button class="lib__view-btn is-active" data-view="shelf">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="2" width="5" height="5" rx="1"></rect>
+            <rect x="9" y="2" width="5" height="5" rx="1"></rect>
+            <rect x="2" y="9" width="5" height="5" rx="1"></rect>
+            <rect x="9" y="9" width="5" height="5" rx="1"></rect>
+          </svg>
+          书架
+        </button>
+        <button class="lib__view-btn" data-view="timeline">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M5 4h9M5 8h9M5 12h9"></path>
+            <circle cx="2" cy="4" r="0.8" fill="currentColor"></circle>
+            <circle cx="2" cy="8" r="0.8" fill="currentColor"></circle>
+            <circle cx="2" cy="12" r="0.8" fill="currentColor"></circle>
+          </svg>
+          时间轴
+        </button>
+      </div>
+    </div>
+
+    <div class="lib__subfilter" id="lib-shelves">
+      <span class="lib__subfilter-label">状态</span>
+      {shelfChips.map((s, i) => (
+        <button class:list={["lib__chip", "lib__chip--sm", { "is-active": i === 0 }]} data-shelf={s.key}>
+          {s.label}
+        </button>
+      ))}
+    </div>
+
+    <p class="lib__count"><span id="lib-count">{grid.length}</span> entries</p>
+
+    {/* ─── Shelf ─── */}
+    <div class="lib__grid lib__pane lib__pane--shelf">
+      {grid.map((it) => (
+        <article class="lib-card" data-uuid={it.uuid} data-cat={it.category} data-shelf={it.shelf} data-title={it.title.toLowerCase()} data-note={it.comment.toLowerCase()}>
+          <a class="lib-card__link" href={it.url} target="_blank" rel="noopener" data-lib-open={it.uuid}>
+            <div class="lib-card__cover">
+              <MediaCover title={it.title} category={it.category} cover={it.cover} />
+              {it.shelf !== "complete" && <span class="lib-card__pill">{shelfPill[it.shelf]}</span>}
+            </div>
+            <div class="lib-card__meta">
+              <h3 class="lib-card__title">{it.title}</h3>
+              <RatingStars rating={it.rating} />
+            </div>
+          </a>
+        </article>
+      ))}
+    </div>
+
+    {/* ─── Timeline ─── */}
+    <div class="lib__timeline lib__pane lib__pane--timeline">
+      {months.map((mo) => (
+        <section class="lib-month" data-month={mo.key}>
+          <h2 class="lib-month__label">
+            <span>{mo.label}</span>
+            <span class="lib-month__rule"></span>
+          </h2>
+          <div class="lib-month__items">
+            {mo.items.map((it) => (
+              <article class="lib-card lib-row" data-uuid={it.uuid} data-cat={it.category} data-shelf={it.shelf} data-title={it.title.toLowerCase()} data-note={it.comment.toLowerCase()}>
+                <a class="lib-row__link" href={it.url} target="_blank" rel="noopener" data-lib-open={it.uuid}>
+                  <div class="lib-row__cover">
+                    <MediaCover title={it.title} category={it.category} cover={it.cover} />
+                  </div>
+                  <div class="lib-row__body">
+                    <div class="lib-row__head">
+                      <h3 class="lib-row__title">{it.title}</h3>
+                      <span class="lib-row__cat">{catLabel[it.category]}</span>
+                    </div>
+                    <div class="lib-row__rating">
+                      <RatingStars rating={it.rating} />
+                    </div>
+                    {it.comment && <p class="lib-row__note" set:html={renderComment(it.comment)}></p>}
+                    {it.tags.length > 0 && (
+                      <div class="lib-row__tags">
+                        {it.tags.map((t) => <span class="lib-row__tag">{t}</span>)}
+                      </div>
+                    )}
+                  </div>
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <p class="lib__empty" id="lib-empty" hidden>没有匹配的条目。</p>
+
+    <LibraryModal items={libraryItems} />
+  </section>
+</PageLayout>
+
+<script is:inline>
+  (function () {
+    var sec = document.getElementById("lib");
+    if (!sec) return;
+    var search = document.getElementById("lib-search");
+    var catChips = sec.querySelector("#lib-cats").querySelectorAll(".lib__chip");
+    var shelfChips = sec.querySelector("#lib-shelves").querySelectorAll(".lib__chip");
+    var viewBtns = sec.querySelectorAll(".lib__view-btn");
+    var cards = sec.querySelectorAll(".lib-card");
+    var months = sec.querySelectorAll(".lib-month");
+    var countEl = document.getElementById("lib-count");
+    var emptyEl = document.getElementById("lib-empty");
+    var query = "";
+    var cats = [];
+    var shelf = "";
+    var timer = null;
+
+    function matches(card) {
+      if (cats.length && cats.indexOf(card.getAttribute("data-cat")) === -1) return false;
+      if (shelf && card.getAttribute("data-shelf") !== shelf) return false;
+      if (!query) return true;
+      var hay = card.getAttribute("data-title") + " " + card.getAttribute("data-note");
+      return hay.indexOf(query) > -1;
+    }
+
+    function apply() {
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.toggle("is-hidden", !matches(cards[i]));
+      }
+      for (var j = 0; j < months.length; j++) {
+        var any = months[j].querySelector(".lib-card:not(.is-hidden)");
+        months[j].classList.toggle("is-hidden", !any);
+      }
+      var view = sec.getAttribute("data-view");
+      var pane = sec.querySelector(".lib__pane--" + view);
+      var visible = pane ? pane.querySelectorAll(".lib-card:not(.is-hidden)").length : 0;
+      if (countEl) countEl.textContent = visible;
+      if (emptyEl) emptyEl.hidden = visible > 0;
+    }
+
+    search.addEventListener("input", function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        query = search.value.trim().toLowerCase();
+        apply();
+      }, 150);
+    });
+
+    function bindChips(list, onPick) {
+      for (var c = 0; c < list.length; c++) {
+        list[c].addEventListener("click", function (e) {
+          for (var k = 0; k < list.length; k++) list[k].classList.remove("is-active");
+          e.currentTarget.classList.add("is-active");
+          onPick(e.currentTarget);
+          apply();
+        });
+      }
+    }
+
+    bindChips(catChips, function (el) {
+      var v = el.getAttribute("data-cats");
+      cats = v ? v.split(",") : [];
+    });
+    bindChips(shelfChips, function (el) {
+      shelf = el.getAttribute("data-shelf") || "";
+    });
+
+    for (var b = 0; b < viewBtns.length; b++) {
+      viewBtns[b].addEventListener("click", function (e) {
+        for (var k = 0; k < viewBtns.length; k++) viewBtns[k].classList.remove("is-active");
+        e.currentTarget.classList.add("is-active");
+        sec.setAttribute("data-view", e.currentTarget.getAttribute("data-view"));
+        apply();
+      });
+    }
+
+    apply();
+  })();
+</script>
+
+<style>
+  .lib {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+
+  /* ─── Header ─── */
+
+  .lib__header {
+    margin-bottom: var(--space-8);
+  }
+
+  .lib__eyebrow {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-xs);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-tertiary);
+  }
+
+  .lib__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .lib__desc {
+    margin: var(--space-4) 0 0;
+    color: var(--color-ink-secondary);
+    font-size: var(--text-lg);
+  }
+
+  .lib__desc a {
+    color: var(--color-accent);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  /* ─── Controls ─── */
+
+  .lib__controls {
+    position: sticky;
+    top: 64px;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+    padding-block: var(--space-3);
+    background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .lib__search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: 1 1 220px;
+    min-width: 180px;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-warm);
+  }
+
+  .lib__search svg {
+    flex-shrink: 0;
+    color: var(--color-ink-tertiary);
+  }
+
+  .lib__search input {
+    width: 100%;
+    border: none;
+    background: none;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+  }
+
+  .lib__search input::placeholder {
+    color: var(--color-ink-tertiary);
+  }
+
+  .lib__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .lib__chip {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    color: var(--color-ink-secondary);
+    background: none;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-smooth),
+                border-color var(--duration-fast) var(--ease-smooth),
+                background var(--duration-fast) var(--ease-smooth);
+  }
+
+  .lib__chip:hover {
+    color: var(--color-ink);
+    border-color: var(--color-rule-strong);
+  }
+
+  .lib__chip.is-active {
+    color: var(--color-bg);
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .lib__views {
+    display: flex;
+    gap: 2px;
+    margin-left: auto;
+    padding: 2px;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-full);
+  }
+
+  .lib__view-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    color: var(--color-ink-secondary);
+    background: none;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-smooth),
+                background var(--duration-fast) var(--ease-smooth);
+  }
+
+  .lib__view-btn.is-active {
+    color: var(--color-accent);
+    background: var(--color-accent-subtle);
+  }
+
+  /* ─── Status sub-filter ─── */
+
+  .lib__subfilter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+
+  .lib__subfilter-label {
+    margin-right: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    color: var(--color-ink-tertiary);
+  }
+
+  .lib__chip--sm {
+    padding: 2px var(--space-3);
+  }
+
+  .lib__count {
+    margin: 0 0 var(--space-6);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-ink-tertiary);
+  }
+
+  /* ─── Shelf grid ─── */
+
+  .lib__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-8) var(--space-4);
+  }
+
+  .lib-card__link {
+    display: block;
+  }
+
+  .lib-card__cover {
+    position: relative;
+    transition: transform var(--duration-normal) var(--ease-smooth);
+  }
+
+  .lib-card__link:hover .lib-card__cover {
+    transform: translateY(-4px);
+  }
+
+  .lib-card__pill {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    padding: 2px 8px;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-ink-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(4px);
+  }
+
+  .lib-card__meta {
+    margin-top: var(--space-3);
+  }
+
+  .lib-card__title {
+    margin: 0 0 var(--space-1);
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ─── Timeline ─── */
+
+  .lib__timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+  }
+
+  .lib-month__label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin: 0 0 var(--space-6);
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .lib-month__rule {
+    flex: 1;
+    height: 1px;
+    background: var(--color-rule);
+  }
+
+  .lib-month__items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .lib-row__link {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+
+  .lib-row__cover {
+    flex-shrink: 0;
+    width: 64px;
+    transition: transform var(--duration-normal) var(--ease-smooth);
+  }
+
+  .lib-row__link:hover .lib-row__cover {
+    transform: translateY(-3px);
+  }
+
+  .lib-row__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .lib-row__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .lib-row__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+
+  .lib-row__cat {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-ink-tertiary);
+  }
+
+  .lib-row__rating {
+    margin-top: var(--space-2);
+  }
+
+  .lib-row__note {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--color-ink-secondary);
+  }
+
+  .lib-row__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  .lib-row__tag {
+    padding: 1px 8px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-ink-tertiary);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-sm);
+  }
+
+  /* ─── View switching + filtering ─── */
+
+  .lib-card.is-hidden,
+  .lib-month.is-hidden {
+    display: none;
+  }
+
+  .lib[data-view="shelf"] .lib__pane--timeline {
+    display: none;
+  }
+
+  .lib[data-view="timeline"] .lib__pane--shelf {
+    display: none;
+  }
+
+  .lib__empty {
+    padding: var(--space-16) 0;
+    text-align: center;
+    color: var(--color-ink-tertiary);
+  }
+
+  /* ─── Responsive ─── */
+
+  @media (max-width: 640px) {
+    .lib {
+      padding-top: var(--space-8);
+    }
+
+    .lib__title {
+      font-size: var(--text-3xl);
+    }
+
+    .lib__controls {
+      position: static;
+    }
+
+    .lib__views {
+      margin-left: 0;
+    }
+
+    .lib__grid {
+      grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+      gap: var(--space-6) var(--space-3);
+    }
+  }
+
+</style>

@@ -1,0 +1,91 @@
+---
+// Renders a media cover. Uses the real image when available, otherwise an
+// on-brand placeholder. The placeholder is the production fallback too:
+// some NeoDB items legitimately have no cover_image_url.
+interface Props {
+  title: string;
+  category: string;
+  cover?: string | null;
+}
+const { title, category, cover } = Astro.props;
+
+const labels: Record<string, string> = {
+  book: "Book",
+  movie: "Film",
+  tv: "TV",
+  music: "Music",
+  game: "Game",
+  podcast: "Podcast",
+};
+const label = labels[category] ?? category;
+---
+
+{
+  cover ? (
+    <img class="cover cover--img" src={cover} alt={`${title} cover`} loading="lazy" />
+  ) : (
+    <div class:list={["cover", "cover--ph", `cover--${category}`]} aria-hidden="true">
+      <span class="cover__title">{title}</span>
+      <span class="cover__label">{label}</span>
+    </div>
+  )
+}
+
+<style>
+  .cover {
+    aspect-ratio: 2 / 3;
+    width: 100%;
+    border-radius: var(--radius-md);
+    display: block;
+  }
+
+  .cover--img {
+    object-fit: cover;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .cover--ph {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4) var(--space-3) calc(var(--space-3) + 0.9rem);
+    text-align: center;
+    border: 1px solid var(--color-rule);
+    box-shadow: var(--shadow-sm);
+    background: linear-gradient(150deg, var(--color-bg-elevated), var(--color-accent-subtle));
+  }
+
+  .cover__title {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .cover__label {
+    position: absolute;
+    bottom: var(--space-3);
+    left: 0;
+    right: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-ink-tertiary);
+  }
+
+  /* Per-category tint so the shelf reads as a varied collection */
+  .cover--book { background: linear-gradient(150deg, var(--color-bg-elevated), rgba(139, 98, 67, 0.12)); }
+  .cover--movie { background: linear-gradient(150deg, var(--color-bg-elevated), rgba(67, 98, 139, 0.12)); }
+  .cover--tv { background: linear-gradient(150deg, var(--color-bg-elevated), rgba(98, 139, 67, 0.12)); }
+  .cover--music { background: linear-gradient(150deg, var(--color-bg-elevated), rgba(139, 67, 120, 0.12)); }
+  .cover--game { background: linear-gradient(150deg, var(--color-bg-elevated), rgba(139, 120, 67, 0.12)); }
+  .cover--podcast { background: linear-gradient(150deg, var(--color-bg-elevated), rgba(67, 130, 139, 0.12)); }
+</style>

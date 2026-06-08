@@ -1,9 +1,21 @@
 ---
 import PageLayout from "@/layouts/PageLayout.astro";
 import { getPublishedPosts, formatDate, postSlug, readingTime } from "@/lib/blog";
+import { fetchLibraryItems } from "@/lib/neodb";
+import MediaCover from "@/components/content/MediaCover.astro";
+import RatingStars from "@/components/content/RatingStars.astro";
+import LibraryModal from "@/components/content/LibraryModal.astro";
 
 const posts = await getPublishedPosts();
 const latestPosts = posts.slice(0, 4);
+
+const recentLibrary = (await fetchLibraryItems()).slice(0, 6);
+const shelfLabel: Record<string, string> = {
+  complete: "看过",
+  progress: "在看",
+  wishlist: "想看",
+  dropped: "弃",
+};
 ---
 
 <PageLayout>
@@ -89,6 +101,38 @@ const latestPosts = posts.slice(0, 4);
     </div>
   </section>
 
+  {recentLibrary.length > 0 && (
+    <section class="lately container">
+      <div class="lately__head">
+        <div>
+          <p class="lately__eyebrow">Lately</p>
+          <h2 class="lately__title">From the Library</h2>
+        </div>
+        <a class="lately__cta" href="/library">
+          View all
+          <span class="section-card__arrow" aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="lately__row">
+        {recentLibrary.map((it) => (
+          <a class="lately__item" href={it.url} target="_blank" rel="noopener" data-lib-open={it.uuid} aria-label={it.title}>
+            <div class="lately__cover">
+              <MediaCover title={it.title} category={it.category} cover={it.cover} />
+            </div>
+            <p class="lately__item-title">{it.title}</p>
+            {it.rating ? (
+              <RatingStars rating={it.rating} />
+            ) : (
+              <span class="lately__status">{shelfLabel[it.shelf]}</span>
+            )}
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {recentLibrary.length > 0 && <LibraryModal items={recentLibrary} />}
+
   <footer class="colophon container">
     <div class="colophon__rule" aria-hidden="true" />
     <p class="colophon__text">A calm space for writing, building, and thinking.</p>
@@ -99,8 +143,8 @@ const latestPosts = posts.slice(0, 4);
   /* ─── Hero ─── */
 
   .hero {
-    padding-top: var(--space-24);
-    padding-bottom: var(--space-16);
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-12);
   }
 
   .hero__eyebrow {
@@ -133,7 +177,7 @@ const latestPosts = posts.slice(0, 4);
   /* ─── Section Cards ─── */
 
   .sections {
-    padding-bottom: var(--space-24);
+    padding-bottom: var(--space-12);
   }
 
   .sections__grid {
@@ -323,6 +367,92 @@ const latestPosts = posts.slice(0, 4);
     flex-shrink: 0;
   }
 
+  /* ─── Lately (Library strip) ─── */
+
+  .lately {
+    padding-bottom: var(--space-24);
+  }
+
+  .lately__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .lately__eyebrow {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-xs);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-tertiary);
+  }
+
+  .lately__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .lately__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .lately__cta:hover .section-card__arrow {
+    transform: translateX(5px);
+  }
+
+  .lately__row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--space-4);
+  }
+
+  .lately__item {
+    display: block;
+    min-width: 0;
+  }
+
+  .lately__cover {
+    transition: transform var(--duration-normal) var(--ease-smooth);
+  }
+
+  .lately__item:hover .lately__cover {
+    transform: translateY(-4px);
+  }
+
+  .lately__item-title {
+    margin: var(--space-3) 0 var(--space-1);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lately__item:hover .lately__item-title {
+    color: var(--color-accent);
+  }
+
+  .lately__status {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-ink-tertiary);
+  }
+
   /* ─── Colophon ─── */
 
   .colophon {
@@ -358,6 +488,10 @@ const latestPosts = posts.slice(0, 4);
     .section-card--wide {
       grid-row: auto;
     }
+
+    .lately__row {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 
   @media (max-width: 480px) {
@@ -392,7 +526,7 @@ const latestPosts = posts.slice(0, 4);
     }
 
     .sections {
-      padding-bottom: var(--space-16);
+      padding-bottom: var(--space-8);
     }
   }
 </style>

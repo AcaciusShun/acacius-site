@@ -1,0 +1,450 @@
+---
+// Shared detail modal for Library items, used on the homepage strip and the
+// /library page. Any element with `data-lib-open="<uuid>"` opens it (a plain
+// left-click; modified clicks still follow the element's href to NeoDB).
+import type { LibraryItem } from "@/lib/neodb";
+
+interface Props {
+  items: LibraryItem[];
+}
+const { items } = Astro.props;
+
+const catLabel: Record<string, string> = {
+  book: "Book",
+  movie: "Film",
+  tv: "TV",
+  music: "Music",
+  game: "Game",
+  podcast: "Podcast",
+};
+const shelfLabel: Record<string, string> = {
+  complete: "看过",
+  progress: "在看",
+  wishlist: "想看",
+  dropped: "弃",
+};
+const clip = (s: string, n = 360) => (s.length > n ? s.slice(0, n).trimEnd() + "…" : s);
+
+const modalData = JSON.stringify(
+  Object.fromEntries(
+    items.map((it) => [
+      it.uuid,
+      {
+        title: it.title,
+        cat: catLabel[it.category] ?? it.category,
+        shelf: shelfLabel[it.shelf] ?? "",
+        date: it.date,
+        cover: it.cover,
+        myRating: it.rating,
+        comm: it.communityRating ?? null,
+        count: it.ratingCount ?? null,
+        comment: it.comment,
+        tags: it.tags,
+        url: it.url,
+        desc: clip(it.description ?? ""),
+      },
+    ]),
+  ),
+).replace(/</g, "\\u003c");
+---
+
+<dialog class="lib-modal" id="lib-modal">
+  <button class="lib-modal__close" id="lib-modal-close" aria-label="关闭">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <path d="M4 4l8 8M12 4l-8 8"></path>
+    </svg>
+  </button>
+  <div class="lib-modal__scroll">
+    <div class="lib-modal__top">
+      <div class="lib-modal__cover">
+        <img id="lm-cover" alt="" />
+      </div>
+      <div class="lib-modal__info">
+        <p class="lib-modal__eyebrow" id="lm-cat"></p>
+        <h2 class="lib-modal__title" id="lm-title"></h2>
+
+        <div class="lib-modal__ratings">
+          <div class="lib-modal__rate">
+            <span class="lib-modal__rate-label">我的评分</span>
+            <span id="lm-myrating"></span>
+          </div>
+          <div class="lib-modal__rate">
+            <span class="lib-modal__rate-label">总评分</span>
+            <span id="lm-commrating"></span>
+          </div>
+        </div>
+
+        <div class="lib-modal__section" id="lm-desc-wrap">
+          <span class="lib-modal__sec-label">简介</span>
+          <p class="lib-modal__desc" id="lm-desc"></p>
+        </div>
+
+        <div class="lib-modal__section" id="lm-tags-wrap">
+          <span class="lib-modal__sec-label">标签</span>
+          <div class="lib-modal__tags" id="lm-tags"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lib-modal__review" id="lm-comment-wrap">
+      <span class="lib-modal__sec-label">我的点评</span>
+      <p class="lib-modal__comment" id="lm-comment"></p>
+    </div>
+
+    <a class="lib-modal__link" id="lm-link" target="_blank" rel="noopener">在 NeoDB 查看 →</a>
+  </div>
+</dialog>
+
+<script id="lib-data" type="application/json" is:inline set:html={modalData}></script>
+
+<script is:inline>
+  (function () {
+    var modal = document.getElementById("lib-modal");
+    if (!modal) return;
+    var DATA = {};
+    try {
+      DATA = JSON.parse(document.getElementById("lib-data").textContent);
+    } catch (err) {}
+
+    function starHtml(r) {
+      if (r == null) return '<span class="lm-none">未评分</span>';
+      var pct = Math.round((r / 10) * 100);
+      return (
+        '<span class="lm-stars"><span class="lm-stars__bar"><span class="lm-stars__track">★★★★★</span>' +
+        '<span class="lm-stars__fill" style="width:' + pct + '%">★★★★★</span></span>' +
+        '<span class="lm-stars__num">' + r.toFixed(1) + "</span></span>"
+      );
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function renderComment(text) {
+      var out = "", re = />!([\s\S]*?)!</g, last = 0, m;
+      while ((m = re.exec(text))) {
+        out += escapeHtml(text.slice(last, m.index));
+        out += '<span class="spoiler">' + escapeHtml(m[1]) + "</span>";
+        last = re.lastIndex;
+      }
+      return out + escapeHtml(text.slice(last));
+    }
+
+    function setSection(wrapId, contentId, text) {
+      var wrap = document.getElementById(wrapId);
+      var el = document.getElementById(contentId);
+      if (text) {
+        el.textContent = text;
+        wrap.hidden = false;
+      } else {
+        wrap.hidden = true;
+      }
+    }
+
+    function openModal(uuid) {
+      var d = DATA[uuid];
+      if (!d) return;
+      var cover = document.getElementById("lm-cover");
+      if (d.cover) {
+        cover.src = d.cover;
+        cover.style.display = "";
+      } else {
+        cover.style.display = "none";
+      }
+      document.getElementById("lm-cat").textContent = [d.cat, d.shelf, d.date].filter(Boolean).join("  ·  ");
+      document.getElementById("lm-title").textContent = d.title;
+      document.getElementById("lm-myrating").innerHTML = starHtml(d.myRating);
+      var comm = starHtml(d.comm);
+      if (d.comm != null && d.count) comm += '<span class="lm-count">' + d.count + " 人</span>";
+      document.getElementById("lm-commrating").innerHTML = comm;
+      var cwrap = document.getElementById("lm-comment-wrap");
+      if (d.comment) {
+        document.getElementById("lm-comment").innerHTML = renderComment(d.comment);
+        cwrap.hidden = false;
+      } else {
+        cwrap.hidden = true;
+      }
+      setSection("lm-desc-wrap", "lm-desc", d.desc);
+      var tagsWrap = document.getElementById("lm-tags-wrap");
+      if (d.tags && d.tags.length) {
+        document.getElementById("lm-tags").innerHTML = d.tags
+          .map(function (t) { return '<span class="lm-tag">' + escapeHtml(t) + "</span>"; })
+          .join("");
+        tagsWrap.hidden = false;
+      } else {
+        tagsWrap.hidden = true;
+      }
+      document.getElementById("lm-link").href = d.url;
+      var sc = modal.querySelector(".lib-modal__scroll");
+      if (sc) sc.scrollTop = 0;
+      modal.showModal();
+    }
+
+    // Plain left-click opens the modal; modified clicks follow the href (NeoDB, new tab).
+    document.addEventListener("click", function (e) {
+      var trigger = e.target.closest("[data-lib-open]");
+      if (!trigger) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      openModal(trigger.getAttribute("data-lib-open"));
+    });
+
+    document.getElementById("lib-modal-close").addEventListener("click", function () {
+      modal.close();
+    });
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) modal.close();
+    });
+  })();
+</script>
+
+<style>
+  .lib-modal {
+    position: fixed;
+    inset: 0;
+    width: calc(100% - var(--space-8));
+    max-width: 600px;
+    height: fit-content;
+    max-height: 86vh;
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--color-rule-strong);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-elevated);
+    color: var(--color-ink);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+    overflow: hidden;
+  }
+
+  .lib-modal::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+  }
+
+  .lib-modal__close {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: var(--color-ink-tertiary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-smooth),
+                border-color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .lib-modal__close:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .lib-modal__scroll {
+    padding: var(--space-6);
+    max-height: 86vh;
+    overflow-y: auto;
+  }
+
+  .lib-modal__top {
+    display: flex;
+    gap: var(--space-6);
+  }
+
+  .lib-modal__cover {
+    flex-shrink: 0;
+    width: 150px;
+  }
+
+  .lib-modal__cover img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .lib-modal__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .lib-modal__eyebrow {
+    margin: 0 0 var(--space-2);
+    padding-right: var(--space-8);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    color: var(--color-ink-tertiary);
+  }
+
+  .lib-modal__title {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-ink);
+  }
+
+  .lib-modal__ratings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+  }
+
+  .lib-modal__rate {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .lib-modal__rate-label,
+  .lib-modal__sec-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    color: var(--color-ink-tertiary);
+  }
+
+  .lib-modal__section {
+    margin-top: var(--space-5);
+  }
+
+  .lib-modal__sec-label {
+    display: block;
+    margin-bottom: var(--space-2);
+  }
+
+  .lib-modal__review {
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .lib-modal__comment {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: 1.7;
+    color: var(--color-ink);
+  }
+
+  .lib-modal__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .lib-modal__desc {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--color-ink-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lib-modal__link {
+    display: inline-block;
+    margin-top: var(--space-6);
+    font-size: var(--text-sm);
+    color: var(--color-accent);
+    border-bottom: 1px solid var(--color-rule);
+    transition: border-color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .lib-modal__link:hover {
+    border-color: var(--color-accent);
+  }
+
+  /* JS-injected modal markup (needs :global to escape Astro scoping) */
+  :global(.lm-stars) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    line-height: 1;
+  }
+
+  :global(.lm-stars__bar) {
+    position: relative;
+    display: inline-block;
+    font-size: var(--text-lg);
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+
+  :global(.lm-stars__track) {
+    color: var(--color-rule-strong);
+  }
+
+  :global(.lm-stars__fill) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--color-accent);
+  }
+
+  :global(.lm-stars__num) {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+  }
+
+  :global(.lm-none) {
+    font-size: var(--text-sm);
+    color: var(--color-ink-tertiary);
+  }
+
+  :global(.lm-count) {
+    margin-left: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-ink-tertiary);
+  }
+
+  :global(.lm-tag) {
+    padding: 1px 8px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-ink-tertiary);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-sm);
+  }
+
+  /* NeoDB spoilers — hidden block, reveal on hover */
+  :global(.spoiler) {
+    background: var(--color-ink);
+    color: transparent;
+    border-radius: 3px;
+    padding: 0 3px;
+    cursor: help;
+    transition: color var(--duration-normal) var(--ease-smooth),
+                background var(--duration-normal) var(--ease-smooth);
+  }
+
+  :global(.spoiler:hover) {
+    background: var(--color-accent-subtle);
+    color: var(--color-ink);
+  }
+
+  @media (max-width: 520px) {
+    .lib-modal__top {
+      flex-direction: column;
+    }
+
+    .lib-modal__cover {
+      width: 116px;
+    }
+  }
+</style>
