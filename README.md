@@ -15,7 +15,7 @@ Personal site and digital study — built with [Astro 6](https://astro.build/), 
   - Category filter (Books / Movies & TV / Music / Games / Podcasts) + a status sub-filter (看过 / 在看 / 想看)
   - Click any item for a detail modal — your rating, community rating, review, synopsis, tags, and a link back to NeoDB
   - `>!spoiler!<` markup rendered as reveal-on-hover blocks
-  - Data is fetched at **build time**; covers are downloaded and optimized to local WebP
+  - Data is fetched at **build time**; covers are served straight from NeoDB
 - **Projects** — curated showcase of personal and course work
 - **Labs** — space for experiments, prototypes, and small demos
 - **Friends** — blogroll / link exchange page
@@ -54,17 +54,20 @@ Environment variables live in `.env` (gitignored). Copy `.env.example` to `.env`
 
 - **Fetch** — pulls every shelf (`wishlist` / `progress` / `complete` / `dropped`) from `GET /api/me/shelf/{type}` (paginated, Bearer auth) and maps them to a typed `LibraryItem[]`.
 - **Cache** — stores the result on disk (`node_modules/.cache/neodb/`) so `astro dev` doesn't re-hit the API on every page load; `astro build` always refetches fresh.
-- **Covers** — downloads each cover, resizes it to WebP under `public/covers/` (served from your own domain), and falls back to the remote URL if a download fails.
+- **Covers** — referenced directly from NeoDB (`cover_image_url`), lazy-loaded; no local image pipeline.
 - **Resilience** — if `NEODB_TOKEN` is unset or a fetch fails, it falls back to bundled sample data so the build never breaks.
 
-To refresh the Library: mark items on NeoDB, then rebuild and redeploy.
+Because the data is baked at build time, the live site refreshes on each rebuild.
+[`.github/workflows/refresh-library.yml`](.github/workflows/refresh-library.yml) triggers a
+Cloudflare Pages rebuild on a schedule (and on demand) so new NeoDB marks show up
+automatically — set a `CF_DEPLOY_HOOK` repo secret to your Pages deploy-hook URL.
 
 ## Development
 
 ```bash
 npm install
 npm run dev        # http://localhost:4321
-npm run build      # production build (fetches NeoDB + optimizes covers + indexes search)
+npm run build      # production build (fetches NeoDB + indexes search)
 npm run preview    # preview the production build
 ```
 

@@ -7,11 +7,9 @@
 //   GET /api/me/shelf/{type}?page=N   → { data: Mark[], pages, count }
 // where type ∈ wishlist | progress | complete | dropped.
 
-import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
 import { libraryItems as sampleItems } from "./library-sample";
 
 export type MediaCategory = "book" | "movie" | "tv" | "music" | "game" | "podcast";
@@ -74,71 +72,36 @@ function mapMark(m: NeoMark, base: string): LibraryItem {
   };
 }
 
+// Fetch JSON with retry + backoff, so a transient blip (or 429/5xx) during a
+// build doesn't sink the whole sync into the sample-data fallback.
+async function fetchJson(url: string, token: string, retries = 3): Promise<{ data: NeoMark[]; pages: number }> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) return res.json();
+      // Don't retry real client errors (401/403/404…); do retry 429 / 5xx.
+      if (res.status < 500 && res.status !== 429) throw new Error(`HTTP ${res.status}`);
+      lastErr = new Error(`HTTP ${res.status}`);
+    } catch (err) {
+      lastErr = err;
+    }
+    if (attempt < retries) await new Promise((r) => setTimeout(r, 500 * attempt));
+  }
+  throw lastErr;
+}
+
 async function fetchShelf(type: ShelfType, base: string, token: string): Promise<NeoMark[]> {
   const out: NeoMark[] = [];
   let page = 1;
   let pages = 1;
   do {
-    const res = await fetch(`${base}/api/me/shelf/${type}?page=${page}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error(`NeoDB ${type} p${page} → HTTP ${res.status}`);
-    const json = (await res.json()) as { data: NeoMark[]; pages: number };
+    const json = await fetchJson(`${base}/api/me/shelf/${type}?page=${page}`, token);
     out.push(...json.data);
     pages = json.pages || 1;
     page += 1;
   } while (page <= pages);
   return out;
-}
-
-// ─── Build-time cover optimization ───
-// Download each cover, resize to a small WebP, and serve it from /covers/
-// on our own domain. Cached on disk (keyed by URL hash) so later rebuilds
-// only download new covers. Falls back to the remote URL if anything fails.
-
-const COVER_DIR = path.resolve("public/covers");
-const COVER_WIDTH = 320;
-let coverDirReady = false;
-
-async function localizeCover(remoteUrl: string): Promise<string> {
-  const name = createHash("sha1").update(remoteUrl).digest("hex").slice(0, 16) + ".webp";
-  const outPath = path.join(COVER_DIR, name);
-  const publicPath = `/covers/${name}`;
-  if (existsSync(outPath)) return publicPath; // cache hit
-  try {
-    if (!coverDirReady) {
-      await mkdir(COVER_DIR, { recursive: true });
-      coverDirReady = true;
-    }
-    const res = await fetch(remoteUrl);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const input = Buffer.from(await res.arrayBuffer());
-    const out = await sharp(input)
-      .resize({ width: COVER_WIDTH, withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toBuffer();
-    await writeFile(outPath, out);
-    return publicPath;
-  } catch {
-    return remoteUrl; // graceful fallback to hotlink
-  }
-}
-
-async function localizeCovers(items: LibraryItem[], concurrency = 6): Promise<void> {
-  let i = 0;
-  let local = 0;
-  let fallback = 0;
-  async function worker() {
-    while (i < items.length) {
-      const it = items[i++];
-      if (!it.cover) continue;
-      it.cover = await localizeCover(it.cover);
-      if (it.cover.startsWith("/covers/")) local++;
-      else fallback++;
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
-  console.log(`[neodb] covers: ${local} local, ${fallback} hotlinked (fallback)`);
 }
 
 // ─── Dev cache ───
@@ -196,8 +159,7 @@ async function loadLibraryItems(): Promise<LibraryItem[]> {
     const marks = (await Promise.all(SHELF_TYPES.map((t) => fetchShelf(t, base, token)))).flat();
     const items = marks.map((m) => mapMark(m, base));
     items.sort((a, b) => b.date.localeCompare(a.date));
-    console.log(`[neodb] fetched ${items.length} marks from ${base}`);
-    await localizeCovers(items);
+    console.log(`[neodb] fetched ${items.length} marks from ${base} (remote covers)`);
     await writeDevCache(items);
     return items;
   } catch (err) {

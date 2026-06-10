@@ -1,0 +1,33 @@
+name: Refresh Library (NeoDB)
+
+# Periodically triggers a Cloudflare Pages rebuild so the Library (书影音)
+# picks up new NeoDB marks. The build re-fetches NeoDB and renders fresh
+# static pages.
+#
+# Setup (one-time):
+#   1. Cloudflare Pages → your project → Settings → Builds & deployments →
+#      Deploy hooks → create one → copy its URL.
+#   2. GitHub repo → Settings → Secrets and variables → Actions →
+#      New repository secret → name: CF_DEPLOY_HOOK, value: <that URL>.
+#   3. Make sure NEODB_TOKEN (+ optional NEODB_INSTANCE) are set as
+#      Cloudflare Pages *build* environment variables, or the build falls
+#      back to sample data.
+
+on:
+  schedule:
+    # Every 6 hours (UTC). Change to taste, e.g. "0 * * * *" hourly.
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {} # manual "Run workflow" button for an instant sync
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Pages deploy
+        run: |
+          if [ -z "${{ secrets.CF_DEPLOY_HOOK }}" ]; then
+            echo "::error::CF_DEPLOY_HOOK secret is not set (see this file's header)."
+            exit 1
+          fi
+          curl -fsS -X POST "${{ secrets.CF_DEPLOY_HOOK }}"
+          echo "Triggered a Cloudflare Pages rebuild."

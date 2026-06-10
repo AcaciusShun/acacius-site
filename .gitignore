@@ -9,6 +9,3 @@ dist/
 
 # Claude Code local config
 .claude/
-
-# NeoDB cover cache — derived images, regenerated at build
-public/covers/
