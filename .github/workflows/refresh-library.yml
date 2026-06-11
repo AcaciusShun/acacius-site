@@ -15,11 +15,10 @@ name: Refresh Library (NeoDB)
 
 on:
   schedule:
-    # GitHub cron is UTC-only. This runs hourly during local active hours and
-    # stays quiet overnight:
-    #   UTC 00:00–15:00  ==  UTC+8 (Beijing) 08:00–23:00  → hourly
-    #   UTC 16:00–23:00  ==  UTC+8 00:00–07:00            → no build
-    - cron: "0 0-15 * * *"
+    # GitHub cron is UTC-only. Every 3h during local active hours, quiet overnight:
+    #   UTC 01,04,07,10,13,16  ==  UTC+8 (Beijing) 09:00,12:00,15:00,18:00,21:00,00:00
+    #   (no builds UTC+8 00:00–09:00)
+    - cron: "0 1,4,7,10,13,16 * * *"
   workflow_dispatch: {} # manual "Run workflow" button for an instant sync
 
 jobs:
