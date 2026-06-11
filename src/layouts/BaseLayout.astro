@@ -13,9 +13,11 @@ interface Props {
 
 const { title, description, ogType = "website", ogImage, publishedTime, tags } = Astro.props;
 const pageTitle = title ? `${title} — ${siteConfig.title}` : siteConfig.title;
-const pageDescription = description ?? siteConfig.description;
+const pageDescription = description || siteConfig.description;
 const canonicalURL = new URL(Astro.url.pathname, siteConfig.url).href;
-const socialImage = ogImage ?? "https://cdn.somlar.com/2026/05/4fdcb030683575bc2f2843b770c4c924.png";
+// Use the page's own image (e.g. a post cover) when present, otherwise a
+// branded default card — never the homepage screenshot. Always absolute.
+const socialImage = new URL(ogImage ?? "/og-default.png", siteConfig.url).href;
 ---
 
 <html lang="zh-CN">
