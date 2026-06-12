@@ -28,8 +28,8 @@ jobs:
       - name: Trigger Cloudflare Pages deploy
         run: |
           if [ -z "${{ secrets.CF_DEPLOY_HOOK }}" ]; then
-            echo "::error::CF_DEPLOY_HOOK secret is not set (see this file's header)."
-            exit 1
+            echo "::notice::CF_DEPLOY_HOOK not set yet — skipping (no rebuild). Add the secret to enable auto-rebuilds; see this file's header."
+            exit 0
           fi
           curl -fsS -X POST "${{ secrets.CF_DEPLOY_HOOK }}"
           echo "Triggered a Cloudflare Pages rebuild."
