@@ -10,6 +10,7 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { siteConfig } from "./config";
 import { libraryItems as sampleItems } from "./library-sample";
 
 export type MediaCategory = "book" | "movie" | "tv" | "music" | "game" | "podcast";
@@ -52,6 +53,13 @@ interface NeoMark {
   };
 }
 
+// Route covers through Cloudflare Image Transformations on our own zone, so they
+// serve from somlar.com (reachable in mainland China, unlike neodb.social) and
+// are resized + reformatted (WebP/AVIF) at the edge. Requires the zone's
+// Transformations to allow neodb.social as a source origin.
+const COVER_PREFIX = `${siteConfig.url.replace(/\/$/, "")}/cdn-cgi/image/width=400,quality=80,format=auto`;
+const transformCover = (url: string): string => `${COVER_PREFIX}/${url}`;
+
 function mapMark(m: NeoMark, base: string): LibraryItem {
   const it = m.item;
   const url = it.url?.startsWith("http") ? it.url : base + it.url;
@@ -59,7 +67,7 @@ function mapMark(m: NeoMark, base: string): LibraryItem {
     uuid: it.uuid,
     category: it.category,
     title: it.display_title || it.title || "Untitled",
-    cover: it.cover_image_url || null,
+    cover: it.cover_image_url ? transformCover(it.cover_image_url) : null,
     rating: m.rating_grade ?? null,
     comment: m.comment_text || "",
     tags: m.tags || [],
@@ -159,7 +167,7 @@ async function loadLibraryItems(): Promise<LibraryItem[]> {
     const marks = (await Promise.all(SHELF_TYPES.map((t) => fetchShelf(t, base, token)))).flat();
     const items = marks.map((m) => mapMark(m, base));
     items.sort((a, b) => b.date.localeCompare(a.date));
-    console.log(`[neodb] fetched ${items.length} marks from ${base} (remote covers)`);
+    console.log(`[neodb] fetched ${items.length} marks from ${base} (covers via Cloudflare transform)`);
     await writeDevCache(items);
     return items;
   } catch (err) {

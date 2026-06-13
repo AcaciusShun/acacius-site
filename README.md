@@ -15,7 +15,7 @@ Personal site and digital study — built with [Astro 6](https://astro.build/), 
   - Category filter (Books / Movies & TV / Music / Games / Podcasts) + a status sub-filter (看过 / 在看 / 想看)
   - Click any item for a detail modal — your rating, community rating, review, synopsis, tags, and a link back to NeoDB
   - `>!spoiler!<` markup rendered as reveal-on-hover blocks
-  - Data is fetched at **build time**; covers are served straight from NeoDB
+  - Data is fetched at **build time**; covers are served via Cloudflare image transformations (resized to WebP/AVIF, reachable from mainland China)
 - **Projects** — curated showcase of personal and course work
 - **Labs** — space for experiments, prototypes, and small demos
 - **Friends** — blogroll / link exchange page
@@ -54,7 +54,7 @@ Environment variables live in `.env` (gitignored). Copy `.env.example` to `.env`
 
 - **Fetch** — pulls every shelf (`wishlist` / `progress` / `complete` / `dropped`) from `GET /api/me/shelf/{type}` (paginated, Bearer auth) and maps them to a typed `LibraryItem[]`.
 - **Cache** — stores the result on disk (`node_modules/.cache/neodb/`) so `astro dev` doesn't re-hit the API on every page load; `astro build` always refetches fresh.
-- **Covers** — referenced directly from NeoDB (`cover_image_url`), lazy-loaded; no local image pipeline.
+- **Covers** — NeoDB's `cover_image_url` wrapped in a Cloudflare image-transformation URL (`/cdn-cgi/image/...`), so they serve from this zone (reachable in mainland China, unlike neodb.social) and are resized/reformatted at the edge. Requires the zone's Transformations to allow `neodb.social` as a source origin. Lazy-loaded; no local image pipeline.
 - **Resilience** — if `NEODB_TOKEN` is unset or a fetch fails, it falls back to bundled sample data so the build never breaks.
 
 Because the data is baked at build time, the live site refreshes on each rebuild.
