@@ -18,6 +18,9 @@
   --color-accent-subtle: rgba(139, 98, 67, 0.08);
   --color-code-bg: rgba(139, 98, 67, 0.1);
   --color-code-text: #6b4423;
+  --color-code-block-bg: #f8f6f1;
+  --color-code-block-border: rgba(101, 83, 65, 0.18);
+  --color-code-toolbar: rgba(248, 246, 241, 0.88);
   --color-blockquote-bg: rgba(139, 98, 67, 0.06);
   --color-rule: rgba(101, 83, 65, 0.15);
   --color-rule-strong: rgba(101, 83, 65, 0.3);
@@ -89,6 +92,9 @@
   --color-accent-subtle: rgba(196, 149, 106, 0.12);
   --color-code-bg: rgba(196, 149, 106, 0.15);
   --color-code-text: #d4a57a;
+  --color-code-block-bg: #17191d;
+  --color-code-block-border: rgba(196, 181, 165, 0.18);
+  --color-code-toolbar: rgba(23, 25, 29, 0.88);
   --color-blockquote-bg: rgba(196, 149, 106, 0.08);
   --color-rule: rgba(168, 148, 128, 0.15);
   --color-rule-strong: rgba(168, 148, 128, 0.28);

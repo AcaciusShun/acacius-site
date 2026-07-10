@@ -137,16 +137,22 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
   document.querySelectorAll(".prose pre").forEach(function (pre) {
     var btn = document.createElement("button");
     btn.className = "code-copy";
-    btn.textContent = "Copy";
+    btn.type = "button";
+    btn.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>复制</span>';
     btn.setAttribute("aria-label", "Copy code");
+    btn.setAttribute("title", "复制代码");
     pre.style.position = "relative";
     pre.appendChild(btn);
     btn.addEventListener("click", function () {
       var code = pre.querySelector("code");
       var text = code ? code.textContent : pre.textContent;
       navigator.clipboard.writeText(text || "").then(function () {
-        btn.textContent = "Copied!";
-        setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+        btn.classList.add("code-copy--done");
+        btn.querySelector("span").textContent = "已复制";
+        setTimeout(function () {
+          btn.classList.remove("code-copy--done");
+          btn.querySelector("span").textContent = "复制";
+        }, 1500);
       });
     });
   });
@@ -185,29 +191,62 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
 <style>
   /* ─── Code Copy Button ─── */
 
-  .code-copy {
+  :global(.code-copy) {
     position: absolute;
-    top: var(--space-2);
-    right: var(--space-2);
-    padding: 2px var(--space-2);
+    z-index: 2;
+    top: 10px;
+    right: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+    padding: 5px 9px;
     font-family: var(--font-mono);
-    font-size: 0.65rem;
-    color: var(--color-ink-tertiary);
-    background: var(--color-bg);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    line-height: 1;
+    color: var(--color-ink-secondary);
+    background: var(--color-code-toolbar);
+    border: 1px solid var(--color-code-block-border);
+    border-radius: 7px;
+    box-shadow: 0 2px 8px var(--color-shadow);
+    backdrop-filter: blur(8px);
     cursor: pointer;
-    opacity: 0;
+    opacity: 0.72;
     transition: opacity var(--duration-fast) var(--ease-smooth),
-                color var(--duration-fast) var(--ease-smooth);
+                color var(--duration-fast) var(--ease-smooth),
+                border-color var(--duration-fast) var(--ease-smooth),
+                transform var(--duration-fast) var(--ease-smooth);
   }
 
-  :global(.prose pre:hover) .code-copy {
+  :global(.code-copy svg) {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  :global(.prose pre:hover .code-copy),
+  :global(.code-copy:focus-visible) {
     opacity: 1;
   }
 
-  .code-copy:hover {
+  :global(.code-copy:hover) {
     color: var(--color-accent);
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+  }
+
+  :global(.code-copy:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  :global(.code-copy--done) {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
   }
 
   /* ─── Lightbox ─── */
@@ -467,14 +506,40 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
   }
 
   .prose :global(pre) {
+    position: relative;
     margin: var(--space-6) 0;
-    padding: var(--space-4) var(--space-6);
+    padding: 3.25rem var(--space-6) var(--space-4);
     border-radius: var(--radius-md);
     overflow-x: auto;
     font-size: var(--text-sm);
     line-height: 1.6;
-    border: 1px solid var(--color-rule);
-    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-code-block-border);
+    background: var(--color-code-block-bg) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), var(--shadow-sm);
+    scrollbar-color: var(--color-rule-strong) transparent;
+  }
+
+  .prose :global(pre::before) {
+    content: attr(data-language);
+    position: absolute;
+    top: 15px;
+    left: var(--space-6);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-tertiary);
+  }
+
+  :global(.dark) .prose :global(.astro-code) {
+    color: var(--shiki-dark) !important;
+    background-color: var(--color-code-block-bg) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), var(--shadow-sm);
+  }
+
+  :global(.dark) .prose :global(.astro-code span) {
+    color: var(--shiki-dark) !important;
   }
 
   .prose :global(pre code) {
@@ -482,6 +547,26 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
     background: none;
     color: inherit;
     border-radius: 0;
+  }
+
+  @media (max-width: 640px) {
+    .prose :global(pre) {
+      padding: 3rem var(--space-4) var(--space-4);
+    }
+
+    .prose :global(pre::before) {
+      left: var(--space-4);
+    }
+
+    :global(.code-copy span) {
+      display: none;
+    }
+
+    :global(.code-copy) {
+      width: 30px;
+      justify-content: center;
+      padding-inline: 0;
+    }
   }
 
   .prose :global(img) {
