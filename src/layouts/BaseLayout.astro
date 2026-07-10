@@ -31,6 +31,7 @@ const socialImage = new URL(ogImage ?? "/og-default.png", siteConfig.url).href;
     <meta name="author" content={siteConfig.author} />
 
     <link rel="canonical" href={canonicalURL} />
+    <link rel="me" href={siteConfig.mastodon} />
 
     <!-- Open Graph -->
     <meta property="og:type" content={ogType} />
