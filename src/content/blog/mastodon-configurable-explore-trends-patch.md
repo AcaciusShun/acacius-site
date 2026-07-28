@@ -1,22 +1,76 @@
 ---
-title: "为 Mastodon Explore 增加可配置趋势阈值：一个可维护 Patch 的设计与实现"
+title: "用可移除 Patch 维护 Mastodon 定制：5000 字限制与 Explore 阈值"
 date: 2026-07-28
+lastmod: 2026-07-28
 slug: "mastodon-configurable-explore-trends-patch"
-description: "从趋势算法、动态配置、故障回退到跨版本验证，记录如何用一份可独立移除的 Patch 改善小型 Mastodon 实例的 Explore 体验。"
+description: "从后端验证器、实例 API、动态趋势配置到兼容性门禁，记录如何用两份可独立移除的 Patch 维护 Mastodon 的 5000 字限制与 Explore 阈值。"
 tags: ["Mastodon", "Ruby on Rails", "Fediverse", "Docker", "GitHub Actions"]
 categories: ["开发实践"]
 draft: false
 ---
 
-Mastodon 的 Explore 趋势机制默认面向具有一定活跃规模的实例。对于用户量较少的节点，即使每天都有正常交流，热门嘟文、话题标签和链接也可能长期为空。
+自建 Mastodon 很容易从“只改一个常量”走向长期维护 fork：先把嘟文上限从 500 调到 5000，接着为了小站体验调整 Explore，最后每次升级都要重新确认散落在源码里的改动。
 
-直接修改源码中的固定阈值并不困难，真正需要解决的是后续维护：参数应当能在后台调整，异常配置不能影响趋势任务，定制代码还要能跟随上游版本反复应用，并在不再需要时完整移除。
+这次我把两项正在使用的定制重新整理成独立 Patch：
 
-这篇文章记录我为 Mastodon 4.6.x 实现可配置趋势阈值 Patch 时的设计取舍和构建流程。
+1. `001-character-limit.patch`：把本地嘟文上限调整为 5000。
+2. `002-configurable-trends.patch`：让热门嘟文、话题标签和链接阈值可以在管理后台动态配置。
 
-## 默认趋势筛选为何不适合小站
+目标不是减少代码行数，而是让每项定制都能被识别、验证、升级和移除。
 
-Mastodon 的热门内容并不是按喜欢数直接排序。以 4.6.x 为例，默认条件包括：
+## 设计边界
+
+这套实现遵循几个约束：
+
+- 尽量复用 Mastodon 现有的数据和后台表单，不引入新的服务。
+- Patch 应保持单一职责，不能把不相关功能绑在一起。
+- 上游代码不兼容时，构建必须在生成镜像之前停止。
+- 配置读取异常不能中断趋势定时任务。
+- 没有 Patch 时，代码和数据应能回到上游默认行为。
+- 示例中的仓库、镜像和服务器信息全部使用通用占位符。
+
+这意味着实现不只是“功能可用”，还要考虑下一次 Mastodon 发布后的处理成本。
+
+## Patch 001：把嘟文上限调整为 5000
+
+Mastodon 对本地嘟文长度的最终约束位于：
+
+```text
+app/validators/status_length_validator.rb
+```
+
+当前 Patch 只修改一个常量：
+
+```diff
+- MAX_CHARS = 500
++ MAX_CHARS = 5000
+```
+
+看起来很简单，但这个常量同时连接了后端验证和前端展示。
+
+```text
+StatusLengthValidator::MAX_CHARS
+        |
+        +--> Rails 验证器：拒绝超过上限的本地嘟文
+        |
+        +--> Instance API：configuration.statuses.max_characters
+                    |
+                    +--> Web UI：发嘟框计数器与提交限制
+```
+
+实例 API 的 serializer 会把 `MAX_CHARS` 作为 `max_characters` 返回，Web UI 再从服务器配置中读取它。因此不需要额外修改 JavaScript 中的默认值，也不需要维护另一份前端常量。
+
+这里的“字符”也不是简单的字节数。验证器使用 grapheme cluster 计数，将内容警告与正文合并计算；URL 按固定的 23 个字符计入，提及也会经过实体解析。Patch 改变的是最终上限，不会绕过这些原有规则。
+
+### 为什么从覆盖整个文件改成最小 Patch
+
+早期做法是在自定义 Dockerfile 中覆盖完整的 `status_length_validator.rb`。它能工作，但会把上游对该文件的后续修复一并覆盖掉。
+
+现在只保留一行 diff。上游文件结构发生变化时，`git apply --check` 会明确失败；上游仍兼容时，新版本中的其他代码可以正常保留。这比复制一份完整文件更容易审查。
+
+## Patch 002：让 Explore 阈值适应小站
+
+Mastodon 4.6.x 的默认趋势条件更适合具有一定活跃规模的实例：
 
 - 热门嘟文至少获得 5 次喜欢与转嘟的合计互动。
 - 热门话题标签至少由 5 个不同账号使用。
@@ -24,26 +78,9 @@ Mastodon 的热门内容并不是按喜欢数直接排序。以 4.6.x 为例，�
 - 嘟文趋势分数默认每 1 小时衰减一半。
 - 候选嘟文还要满足公开可见、允许发现、不是回复、没有敏感标记等条件。
 
-标签和链接使用的是独立账号数，而不是发布次数。这些限制能够降低重复发布和少数账号操纵趋势的影响，但在小型实例中，`5` 个不同账号可能已经接近一天的全部活跃用户。
+对小型实例来说，5 个不同账号可能已接近一天的全部活跃用户。于是 Explore 并非没有数据，而是内容很难跨过候选阈值。
 
-此外，趋势候选与公开展示是两个阶段。如果实例没有启用“允许热门内容无需事先审核”，降低阈值只会增加候选内容，最终是否出现在 Explore 中仍由管理员决定。
-
-## 设计目标
-
-我给这项改动设定了几个边界：
-
-1. 参数通过现有管理后台保存，不通过环境变量或源码常量管理。
-2. 修改后无需重启 Web 或 Sidekiq。
-3. 不新增数据库迁移，不改变趋势数据结构。
-4. 非法值或读取异常必须回退到上游默认值。
-5. Patch 与其他定制分离，可以独立验证和移除。
-6. 上游代码发生不兼容变化时，构建应在生成镜像之前失败。
-
-这些约束让它更接近一个小型、可维护的扩展，而不是长期 fork 中难以追踪的一组零散修改。
-
-## 后台配置模型
-
-Patch 在“管理后台 → 设置 → 发现”中增加四个字段：
+Patch 在“管理后台 → 设置 → 发现”中增加四项配置：
 
 | 设置 | 上游默认值 | 小站起始参考值 |
 | --- | ---: | ---: |
@@ -54,69 +91,153 @@ Patch 在“管理后台 → 设置 → 发现”中增加四个字段：
 
 ![Mastodon 管理后台发现页面中的热门嘟文、话题标签与链接阈值配置](https://cdn.somlar.com/2026/07/eb885fd5fca7f350a0a21161895e80f7.png)
 
-配置复用 Mastodon 已有的 `Setting` 表，因此不需要 migration。管理员保存后，趋势计算在下一批刷新时读取新值，一般几分钟内即可生效。
+这些值复用 Mastodon 的 `Setting` 表，不需要新增 migration。保存后，趋势计算会在下一批刷新时读取新值，不需要重启 Web 或 Sidekiq。
 
-输入范围也在后台和运行时同时受到约束：
+## 动态配置如何进入趋势计算
 
-- 三项数量阈值允许 `1–100`。
-- 嘟文分数半衰期允许 `1–168` 小时。
+公共读取逻辑位于 `Trends::Base`：
 
-这里没有使用进程启动时初始化一次的全局常量。Mastodon 会缓存趋势对象，如果配置只在对象初始化时读取，后台保存后仍可能继续使用旧值。因此，Patch 在每次计算批次开始时解析设置，确保配置真正动态生效。
-
-## 兼容性与故障回退
-
-动态设置不能成为定时任务的新故障点。运行时读取采用“验证后使用，否则回退”的策略：
-
-- 空值使用 Mastodon 原始默认参数。
-- 非数字、越界值和读取异常同样回退到默认参数。
-- 代码内部或测试显式传入的参数拥有更高优先级。
-
-这样即使数据库中留下错误设置，趋势计算也不会因此中断；移除 Patch 后，官方 Mastodon 也只会忽略这些未知的 Setting 记录。
-
-管理页面沿用现有表单结构和响应式布局，桌面端双列显示，窄屏自动堆叠，并补充了英文与简体中文文案。前端没有引入新的状态管理或组件依赖。
-
-## 用独立 Patch 控制定制范围
-
-当前自定义功能按职责拆成两个文件：
-
-```text
-.custom/patches/001-character-limit.patch
-.custom/patches/002-configurable-trends.patch
+```ruby
+def configured_integer(setting_key, fallback, min:, max:)
+  value = Integer(Setting.public_send(setting_key), exception: false)
+  value.nil? ? fallback : value.clamp(min, max)
+rescue StandardError
+  fallback
+end
 ```
 
-`001` 只处理 5000 字符上限，`002` 只处理 Explore 趋势配置。应用脚本按文件名排序执行，避免两个功能在同一个 Patch 中互相牵连。
+`Trends::Statuses`、`Trends::Tags` 和 `Trends::Links` 在每次计算批次开始时取得有效值。这样做是因为趋势对象可能被缓存；如果只在初始化时读取一次，管理员保存配置后仍可能继续使用旧值。
 
-GitHub Actions 在镜像构建前设置了兼容性检查：
+实现还保留了显式参数的优先级：
 
-1. 检出目标 Mastodon 上游版本。
-2. 预检并依次应用全部 Patch。
-3. 检查 Ruby 语法、YAML、后台字段及关键修改。
-4. 验证成功后才构建并推送 Web 与 Streaming 镜像。
+```ruby
+def effective_threshold
+  return options[:threshold] if option_explicitly_configured?(:threshold)
 
-如果新版 Mastodon 调整了趋势模型或管理页面，Patch 将在验证阶段失败，不会继续构建或部署不完整的镜像。当前实现已在官方 `v4.6.3` 和 `v4.6.4` 源码上通过应用验证。
+  configured_integer(
+    :trends_statuses_threshold,
+    options[:threshold],
+    min: 1,
+    max: 100
+  )
+end
+```
 
-## 可移除性也是功能的一部分
+这让现有调用方和测试仍可以传入自己的 `threshold`，只有未显式指定时才读取后台设置。
 
-这项定制没有数据库迁移，也没有修改嘟文、账号或趋势记录的数据结构。移除时只需要：
+运行时的保护包括：
 
-1. 删除 `002-configurable-trends.patch`。
-2. 删除验证脚本中的对应检查。
-3. 移除构建发布说明中的功能描述。
-4. 使用上游默认代码重新构建镜像。
+- 三项数量阈值限制为 `1–100`。
+- 分数半衰期限制为 `1–168` 小时。
+- 空值、非法字符串和读取异常回退到上游默认值。
+- 管理后台表单执行同样的整数与范围验证。
 
-数据库中已有的自定义 Setting 可以清理，也可以保留；未应用 Patch 的代码不会读取它们。
+动态配置因此不会成为趋势任务的新故障点。
 
-把可移除性纳入设计，是因为上游可能在未来提供同类设置，实例规模也可能增长到不再需要低阈值。定制代码应当解决当前问题，而不是永久增加升级成本。
+## Patch 应用与验证流程
 
-## 阈值调整的运营边界
+定制代码没有直接提交到上游源码目录，而是保存在：
 
-工程上支持更低阈值，不代表运营上应该无限降低。阈值越小，少量账号对排名的影响越大，垃圾链接和协同操作也更容易进入候选。
+```text
+.custom/
+├── apply.sh
+├── verify.sh
+└── patches/
+    ├── 001-character-limit.patch
+    └── 002-configurable-trends.patch
+```
 
-对于开放注册实例，更稳妥的做法是保留趋势审核，从较小幅度的调整开始，分别观察嘟文、标签和链接候选的质量。这个 Patch 提供的是控制能力，最终参数仍应由社区规模和审核能力决定。
+一次构建中的处理顺序如下：
+
+```text
+官方 Mastodon tag
+        |
+        v
+按文件名收集 *.patch
+        |
+        v
+git apply --check 全量预检
+        |
+        +-- 失败 --> 停止，不构建镜像
+        |
+        v
+按顺序应用 Patch
+        |
+        v
+Ruby / YAML / diff / 关键字段检查
+        |
+        +-- 失败 --> 停止，不部署服务器
+        |
+        v
+构建 Web 与 Streaming 镜像
+```
+
+`apply.sh` 使用 `set -euo pipefail`，并在真正写入源码前一次性检查全部 Patch。这样不会出现第一份已应用、第二份失败的半完成状态。
+
+`verify.sh` 负责：
+
+- 执行 `git diff --check`。
+- 检查受影响 Ruby 文件和测试文件的语法。
+- 解析 settings 与中英文 locale YAML。
+- 确认 `MAX_CHARS = 5000` 和四个趋势字段确实存在。
+
+需要区分的是：该脚本提供快速兼容性门禁，并不等价于完整的 Mastodon RSpec 测试套件。Patch 内包含设置保存、动态读取、默认回退和后台表单的 specs；在更高风险的版本更新中仍应运行相关测试。
+
+## 在新版本上复现验证
+
+下面使用通用目录名演示，不包含真实仓库与凭据：
+
+```bash
+# 1. 检出准备升级的官方版本
+git clone --branch v4.6.4 --depth 1 \
+  https://github.com/mastodon/mastodon.git source
+
+# 2. 预检并应用全部定制
+bash fork/.custom/apply.sh \
+  "$PWD/fork/.custom" \
+  "$PWD/source"
+
+# 3. 执行快速兼容性检查
+bash fork/.custom/verify.sh "$PWD/source"
+
+# 4. 按正常流程构建镜像
+docker build -t <registry-user>/mastodon:4.6.4-custom source
+```
+
+生产环境中，Web 与 Sidekiq 应使用同一份包含 Rails Patch 的 Mastodon 镜像。Streaming 使用自己的 Dockerfile 构建，并保持与同一上游版本对应。
+
+完整步骤可以概括为：
+
+1. 固定一个明确的 Mastodon 上游 tag。
+2. 在干净源码上运行 Patch 预检。
+3. 应用 Patch 并执行快速验证。
+4. 对受影响功能运行针对性测试。
+5. 构建带版本号的镜像，不只依赖 `latest`。
+6. 先执行官方升级说明要求的迁移，再重启服务。
+7. 验证实例版本、发嘟上限、后台字段和 Explore 候选。
+
+## 可移除性
+
+两项功能互相独立：
+
+- 删除 `001-character-limit.patch` 后，重新构建即可恢复官方字数上限。
+- 删除 `002-configurable-trends.patch` 后，重新构建即可恢复官方趋势参数。
+
+趋势 Patch 没有新增数据库结构。遗留的自定义 Setting 记录可以清理，也可以保留；未应用 Patch 的官方代码不会读取它们。
+
+验证脚本和发布说明中的对应检查也应同步删除，避免构建流程继续寻找已经取消的功能。
+
+## 运营边界
+
+5000 字让成员可以发布完整长文，但不代表每条内容都适合写到上限。更低的趋势阈值也只是在小站中增加候选，不代表放弃审核。
+
+如果没有启用“允许热门内容无需事先审核”，达到阈值的嘟文、标签和链接仍需管理员确认后才会公开显示。对于开放注册实例，建议保留人工审核，并根据候选质量逐步调整参数。
 
 ## 相关代码
 
+- [5000 字符上限 Patch](https://github.com/somincola/mastodon/blob/main/.custom/patches/001-character-limit.patch)
 - [可配置趋势阈值 Patch](https://github.com/somincola/mastodon/blob/main/.custom/patches/002-configurable-trends.patch)
-- [自定义 Mastodon 构建工作流](https://github.com/somincola/mastodon/blob/main/.github/workflows/sync-build-deploy.yml)
+- [Patch 应用脚本](https://github.com/somincola/mastodon/blob/main/.custom/apply.sh)
+- [定制验证脚本](https://github.com/somincola/mastodon/blob/main/.custom/verify.sh)
 
-对于小型实例，Explore 为空看似只是一个展示问题，背后其实连接着算法参数、后台配置、缓存生命周期、构建验证和长期维护。把这些边界一次处理清楚，比单纯把源码里的 `5` 改成 `2` 更有价值。
+真正降低维护成本的不是“改得少”，而是每一项差异都有清楚的边界、失败方式和退出路径。这样定制才能跟随上游继续演进，而不会逐渐变成无法升级的历史包袱。
