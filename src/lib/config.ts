@@ -14,4 +14,7 @@ export const siteConfig = {
   twikoo: {
     envId: import.meta.env.PUBLIC_TWIKOO_ENV_ID || "",
   },
+  analytics: {
+    measurementId: import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "G-CBT6PFDJBD",
+  },
 } as const;

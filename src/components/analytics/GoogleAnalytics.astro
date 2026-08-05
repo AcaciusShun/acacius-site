@@ -1,0 +1,102 @@
+---
+import { siteConfig } from "@/lib/config";
+
+const measurementId = siteConfig.analytics.measurementId;
+---
+
+{measurementId && (
+  <script is:inline define:vars={{ measurementId }}>
+    (() => {
+      const consentKey = "somlar.analytics-consent.v1";
+      const accepted = "accepted";
+      const rejected = "rejected";
+
+      const readChoice = () => {
+        try {
+          const value = localStorage.getItem(consentKey);
+          return value === accepted || value === rejected ? value : null;
+        } catch {
+          return null;
+        }
+      };
+
+      const writeChoice = (value) => {
+        try {
+          localStorage.setItem(consentKey, value);
+        } catch {
+          // The current page still honors the choice when storage is blocked.
+        }
+      };
+
+      const clearAnalyticsCookies = () => {
+        const cookieNames = document.cookie
+          .split(";")
+          .map((cookie) => cookie.split("=")[0].trim())
+          .filter((name) => name === "_ga" || name.startsWith("_ga_"));
+
+        for (const name of cookieNames) {
+          const base = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
+          document.cookie = base;
+          document.cookie = `${base}; Domain=${location.hostname}`;
+          document.cookie = `${base}; Domain=.${location.hostname}`;
+        }
+      };
+
+      const load = () => {
+        if (window.__somlarGaLoaded) return;
+        window.__somlarGaLoaded = true;
+
+        const loader = document.createElement("script");
+        loader.type = "text/partytown";
+        loader.async = true;
+        loader.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+        loader.dataset.somlarGa = "loader";
+
+        const setup = document.createElement("script");
+        setup.type = "text/partytown";
+        setup.dataset.somlarGa = "setup";
+        setup.textContent = `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){ dataLayer.push(arguments); }
+          gtag("consent", "default", {
+            analytics_storage: "granted",
+            ad_storage: "denied",
+            ad_user_data: "denied",
+            ad_personalization: "denied"
+          });
+          gtag("js", new Date());
+          gtag("config", ${JSON.stringify(measurementId)});
+        `;
+
+        document.head.append(loader, setup);
+        window.dispatchEvent(new CustomEvent("ptupdate"));
+      };
+
+      const setChoice = (value) => {
+        const previous = readChoice();
+        writeChoice(value);
+        document.documentElement.dataset.analyticsConsent = value;
+
+        if (value === accepted) {
+          load();
+        } else {
+          clearAnalyticsCookies();
+        }
+
+        window.dispatchEvent(new CustomEvent("somlar:analytics-consent", {
+          detail: { value },
+        }));
+
+        if (value === rejected && previous === accepted) {
+          location.reload();
+        }
+      };
+
+      window.somlarAnalytics = { readChoice, setChoice };
+
+      const choice = readChoice();
+      document.documentElement.dataset.analyticsConsent = choice ?? "unset";
+      if (choice === accepted) load();
+    })();
+  </script>
+)}

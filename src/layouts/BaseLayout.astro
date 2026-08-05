@@ -1,6 +1,8 @@
 ---
 import "@/styles/global.css";
 import { siteConfig } from "@/lib/config";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics.astro";
+import AnalyticsConsent from "@/components/analytics/AnalyticsConsent.astro";
 
 interface Props {
   title?: string;
@@ -85,6 +87,8 @@ const socialImage = new URL(ogImage ?? "/og-default.png", siteConfig.url).href;
       })();
     </script>
 
+    <GoogleAnalytics />
+
     <!-- Fonts: async load to avoid render-blocking -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -108,5 +112,6 @@ const socialImage = new URL(ogImage ?? "/og-default.png", siteConfig.url).href;
   </head>
   <body>
     <slot />
+    <AnalyticsConsent />
   </body>
 </html>

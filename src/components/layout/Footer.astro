@@ -2,6 +2,7 @@
 import { siteConfig } from "@/lib/config";
 
 const year = new Date().getFullYear();
+const analyticsEnabled = Boolean(siteConfig.analytics.measurementId);
 ---
 
 <footer class="footer">
@@ -17,6 +18,14 @@ const year = new Date().getFullYear();
       <a class="footer__link" href="/friends">Friends</a>
       <span class="footer__divider" aria-hidden="true">&middot;</span>
       <a class="footer__link" href="/rss.xml">RSS</a>
+      {analyticsEnabled && (
+        <>
+          <span class="footer__divider" aria-hidden="true">&middot;</span>
+          <button class="footer__link footer__button" type="button" data-analytics-settings>
+            Analytics
+          </button>
+        </>
+      )}
       <span class="footer__divider" aria-hidden="true">&middot;</span>
       <span>Crafted with intention</span>
     </div>
@@ -71,6 +80,18 @@ const year = new Date().getFullYear();
 
   .footer__link {
     transition: color var(--duration-fast) var(--ease-smooth);
+  }
+
+  .footer__button {
+    appearance: none;
+    padding: 0;
+    border: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    background: none;
+    cursor: pointer;
   }
 
   .footer__link:hover {
