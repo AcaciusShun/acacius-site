@@ -10,8 +10,8 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import librarySnapshot from "../data/library-snapshot.json";
 import { siteConfig } from "./config";
-import { libraryItems as sampleItems } from "./library-sample";
 
 export type MediaCategory = "book" | "movie" | "tv" | "music" | "game" | "podcast";
 export type ShelfType = "wishlist" | "progress" | "complete" | "dropped";
@@ -30,6 +30,16 @@ export interface LibraryItem {
   communityRating?: number | null; // item.rating (0–10 average)
   ratingCount?: number | null;
   description?: string; // item synopsis
+}
+
+const snapshotItems = librarySnapshot as LibraryItem[];
+
+function useSnapshot(reason: string): LibraryItem[] {
+  if (snapshotItems.length === 0) {
+    throw new Error(`[neodb] ${reason}; committed Library snapshot is empty.`);
+  }
+  console.warn(`[neodb] ${reason} — using committed Library snapshot (${snapshotItems.length} items).`);
+  return snapshotItems;
 }
 
 const SHELF_TYPES: ShelfType[] = ["complete", "progress", "wishlist", "dropped"];
@@ -159,8 +169,7 @@ async function loadLibraryItems(): Promise<LibraryItem[]> {
   const base = (import.meta.env.NEODB_INSTANCE ?? process.env.NEODB_INSTANCE ?? "https://neodb.social").replace(/\/$/, "");
 
   if (!token) {
-    console.warn("[neodb] NEODB_TOKEN not set — falling back to sample data.");
-    return sampleItems;
+    return useSnapshot("NEODB_TOKEN not set");
   }
 
   try {
@@ -171,7 +180,6 @@ async function loadLibraryItems(): Promise<LibraryItem[]> {
     await writeDevCache(items);
     return items;
   } catch (err) {
-    console.warn(`[neodb] fetch failed (${(err as Error).message}) — falling back to sample data.`);
-    return sampleItems;
+    return useSnapshot(`fetch failed (${(err as Error).message})`);
   }
 }
