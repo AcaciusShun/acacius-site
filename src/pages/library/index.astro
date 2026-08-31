@@ -4,7 +4,7 @@ import MediaCover from "@/components/content/MediaCover.astro";
 import RatingStars from "@/components/content/RatingStars.astro";
 import LibraryModal from "@/components/content/LibraryModal.astro";
 import CategoryBadge from "@/components/content/CategoryBadge.astro";
-import { fetchLibraryItems, type LibraryItem } from "@/lib/neodb";
+import { fetchLibraryItems, type LibraryItem, type ShelfType } from "@/lib/neodb";
 
 const libraryItems = await fetchLibraryItems();
 
@@ -39,7 +39,7 @@ const catChips = allCatChips.filter(
 );
 
 // Status sub-filter — keep only shelves present in the data
-const allShelfChips = [
+const allShelfChips: Array<{ key: ShelfType; label: string }> = [
   { key: "complete", label: "看过" },
   { key: "progress", label: "在看" },
   { key: "wishlist", label: "想看" },

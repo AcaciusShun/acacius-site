@@ -1,6 +1,6 @@
 # Somlar
 
-Personal site and digital study — built with [Astro 6](https://astro.build/), featuring editorial typography, light/dark themes, and a curated content system.
+Personal site and digital study — built with [Astro 7](https://astro.build/), featuring editorial typography, light/dark themes, and a curated content system.
 
 **[somlar.com](https://somlar.com)**
 
@@ -26,7 +26,7 @@ Personal site and digital study — built with [Astro 6](https://astro.build/), 
 
 | Layer | Choice |
 |-------|--------|
-| Framework | Astro 6 (Content Layer API, View Transitions) |
+| Framework | Astro 7 (Content Layer API, View Transitions) |
 | Styling | Tailwind CSS v4 + custom design tokens |
 | Typography | Cormorant Garamond, Inter, JetBrains Mono |
 | Icons | astro-icon + Iconify (Simple Icons, Lucide) |
