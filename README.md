@@ -55,7 +55,9 @@ Environment variables live in `.env` (gitignored). Copy `.env.example` to `.env`
 - **Fetch** — pulls every shelf (`wishlist` / `progress` / `complete` / `dropped`) from `GET /api/me/shelf/{type}` (paginated, Bearer auth) and maps them to a typed `LibraryItem[]`.
 - **Cache** — stores the result on disk (`node_modules/.cache/neodb/`) so `astro dev` doesn't re-hit the API on every page load; `astro build` always refetches fresh.
 - **Covers** — NeoDB's `cover_image_url` wrapped in a Cloudflare image-transformation URL (`/cdn-cgi/image/...`), so they serve from this zone (reachable in mainland China, unlike neodb.social) and are resized/reformatted at the edge. Requires the zone's Transformations to allow `neodb.social` as a source origin. Lazy-loaded; no local image pipeline.
-- **Resilience** — if `NEODB_TOKEN` is unset or a fetch fails, it falls back to bundled sample data so the build never breaks.
+- **Resilience** — if `NEODB_TOKEN` is unset or NeoDB is temporarily unavailable, the build uses the committed last-known-good snapshot in `src/data/library-snapshot.json`. This keeps real Library entries and covers online instead of publishing demo placeholders.
+
+After a successful local sync, refresh the fallback snapshot with `jq . node_modules/.cache/neodb/items.json > src/data/library-snapshot.json`, review the diff, and commit it with the related Library update.
 
 Because the data is baked at build time, the live site refreshes on each rebuild.
 [`.github/workflows/refresh-library.yml`](.github/workflows/refresh-library.yml) triggers a
