@@ -56,7 +56,7 @@ const socialImage = new URL(ogImage ?? "/og-default.png", siteConfig.url).href;
     <link rel="alternate" type="application/rss+xml" title={siteConfig.title} href="/rss.xml" />
 
     <!-- JSON-LD -->
-    <script type="application/ld+json" set:html={JSON.stringify(
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(
       ogType === "article" ? {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
@@ -101,7 +101,7 @@ const socialImage = new URL(ogImage ?? "/og-default.png", siteConfig.url).href;
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500&family=JetBrains+Mono:wght@400&display=swap"
       rel="stylesheet"
       media="print"
-      onload="this.media='all'"
+      onload="this.setAttribute('media','all')"
     />
     <noscript>
       <link

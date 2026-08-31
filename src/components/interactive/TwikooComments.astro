@@ -17,7 +17,7 @@ const envId = siteConfig.twikoo.envId;
   </section>
 )}
 
-<script define:vars={{ envId, path }}>
+<script is:inline define:vars={{ envId, path }}>
   if (envId) {
     const initTwikoo = () => {
       const script = document.createElement("script");
