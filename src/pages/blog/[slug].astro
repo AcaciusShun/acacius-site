@@ -21,6 +21,7 @@ const { post, prev, next } = Astro.props;
 const { Content, headings } = await render(post);
 const body = (post as any).body ?? "";
 const tocHeadings = headings.filter((h) => h.depth <= 3);
+const tocTotal = String(tocHeadings.length).padStart(2, "0");
 ---
 
 <PageLayout
@@ -63,16 +64,51 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
     <div class="article__body">
       {tocHeadings.length >= 3 && (
         <aside class="toc" id="toc">
-          <p class="toc__label">Contents</p>
-          <nav>
-            <ul class="toc__list">
-              {tocHeadings.map((h) => (
-                <li class:list={["toc__item", `toc__item--${h.depth}`]}>
-                  <a class="toc__link" href={`#${h.slug}`}>{h.text}</a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <button
+            class="toc__toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="toc-panel"
+            aria-label="Toggle table of contents"
+          >
+            <span class="toc__toggle-copy">
+              <span class="toc__toggle-label">Contents</span>
+              <span class="toc__current-title">{tocHeadings[0]?.text}</span>
+            </span>
+            <span class="toc__toggle-count" aria-label={`${tocHeadings.length} sections`}>
+              <span data-toc-current>01</span>
+              <span aria-hidden="true"> / </span>
+              <span>{tocTotal}</span>
+            </span>
+            <svg class="toc__toggle-icon" aria-hidden="true" viewBox="0 0 16 16">
+              <path d="m3 6 5 5 5-5" />
+            </svg>
+          </button>
+
+          <div class="toc__panel" id="toc-panel">
+            <div class="toc__header">
+              <p class="toc__label">Contents</p>
+              <span class="toc__count" aria-label={`${tocHeadings.length} sections`}>
+                <span data-toc-current>01</span>
+                <span aria-hidden="true"> / </span>
+                <span>{tocTotal}</span>
+              </span>
+            </div>
+            <nav aria-label="Table of contents">
+              <ul class="toc__list">
+                {tocHeadings.map((h, index) => (
+                  <li class:list={["toc__item", `toc__item--${h.depth}`]}>
+                    <a class="toc__link" href={`#${h.slug}`} data-toc-index={index}>
+                      <span class="toc__index" aria-hidden="true">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span class="toc__text">{h.text}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
         </aside>
       )}
 
@@ -115,19 +151,134 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
 <script is:inline>
   (function () {
     var bar = document.getElementById("progress-bar");
-    if (!bar) return;
+    var toc = document.getElementById("toc");
+    var tocToggle = toc ? toc.querySelector(".toc__toggle") : null;
+    var tocPanel = toc ? toc.querySelector(".toc__panel") : null;
+    var tocLinks = toc ? Array.from(toc.querySelectorAll(".toc__link")) : [];
+    var tocCurrentLabels = toc ? toc.querySelectorAll("[data-toc-current]") : [];
+    var tocCurrentTitle = toc ? toc.querySelector(".toc__current-title") : null;
+    var tocMedia = window.matchMedia("(max-width: 1200px)");
+    var headingNodes = tocLinks.map(function (link) {
+      var id = link.getAttribute("href").slice(1);
+      return document.getElementById(id);
+    });
+    var activeIndex = -1;
     var ticking = false;
-    window.addEventListener("scroll", function () {
+
+    function setTocOpen(open) {
+      if (!toc || !tocToggle) return;
+      if (open) toc.setAttribute("data-open", "");
+      else toc.removeAttribute("data-open");
+      tocToggle.setAttribute("aria-expanded", String(open));
+    }
+
+    function syncTocMode() {
+      if (!toc || !tocToggle) return;
+      if (tocMedia.matches) {
+        tocToggle.setAttribute("aria-expanded", String(toc.hasAttribute("data-open")));
+      } else {
+        toc.removeAttribute("data-open");
+        tocToggle.setAttribute("aria-expanded", "true");
+      }
+    }
+
+    function keepActiveVisible(link) {
+      if (!tocPanel || !link || tocMedia.matches) return;
+      var panelTop = tocPanel.scrollTop;
+      var panelBottom = panelTop + tocPanel.clientHeight;
+      var linkTop = link.offsetTop;
+      var linkBottom = linkTop + link.offsetHeight;
+      if (linkTop < panelTop + 44) {
+        tocPanel.scrollTop = Math.max(0, linkTop - 56);
+      } else if (linkBottom > panelBottom - 12) {
+        tocPanel.scrollTop = linkBottom - tocPanel.clientHeight + 24;
+      }
+    }
+
+    function setActiveToc(index) {
+      if (!tocLinks.length) return;
+      index = Math.max(0, Math.min(index, tocLinks.length - 1));
+      if (index === activeIndex) return;
+      activeIndex = index;
+      tocLinks.forEach(function (link, linkIndex) {
+        var active = linkIndex === index;
+        link.classList.toggle("is-active", active);
+        if (active) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+      var number = String(index + 1).padStart(2, "0");
+      tocCurrentLabels.forEach(function (label) {
+        label.textContent = number;
+      });
+      var activeText = tocLinks[index].querySelector(".toc__text");
+      if (tocCurrentTitle && activeText) {
+        tocCurrentTitle.textContent = activeText.textContent;
+      }
+      keepActiveVisible(tocLinks[index]);
+    }
+
+    function syncActiveToc() {
+      if (!headingNodes.length) return;
+      var threshold = Math.min(180, window.innerHeight * 0.22);
+      var nextIndex = 0;
+      headingNodes.forEach(function (heading, index) {
+        if (heading && heading.getBoundingClientRect().top <= threshold) {
+          nextIndex = index;
+        }
+      });
+      if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4) {
+        nextIndex = headingNodes.length - 1;
+      }
+      setActiveToc(nextIndex);
+    }
+
+    function updateReadingState() {
+      if (bar) {
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        var pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+        bar.style.width = pct + "%";
+      }
+      syncActiveToc();
+      ticking = false;
+    }
+
+    function requestReadingUpdate() {
       if (!ticking) {
-        requestAnimationFrame(function () {
-          var h = document.documentElement.scrollHeight - window.innerHeight;
-          var pct = h > 0 ? (window.scrollY / h) * 100 : 0;
-          bar.style.width = pct + "%";
-          ticking = false;
-        });
+        requestAnimationFrame(updateReadingState);
         ticking = true;
       }
+    }
+
+    if (tocToggle) {
+      tocToggle.addEventListener("click", function () {
+        if (!tocMedia.matches) return;
+        setTocOpen(!toc.hasAttribute("data-open"));
+        if (toc.hasAttribute("data-open") && activeIndex >= 0 && tocPanel) {
+          tocPanel.scrollTop = Math.max(0, tocLinks[activeIndex].offsetTop - 72);
+        }
+      });
+    }
+
+    tocLinks.forEach(function (link, index) {
+      link.addEventListener("click", function () {
+        setActiveToc(index);
+        if (tocMedia.matches) setTocOpen(false);
+      });
     });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && toc && toc.hasAttribute("data-open")) {
+        setTocOpen(false);
+        tocToggle.focus();
+      }
+    });
+
+    tocMedia.addEventListener("change", syncTocMode);
+    window.addEventListener("scroll", requestReadingUpdate, { passive: true });
+    window.addEventListener("resize", requestReadingUpdate);
+    window.addEventListener("hashchange", requestReadingUpdate);
+    syncTocMode();
+    requestReadingUpdate();
   })();
 </script>
 
@@ -189,6 +340,11 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
 </script>
 
 <style>
+  :global(html),
+  :global(body) {
+    overflow-x: clip;
+  }
+
   /* ─── Code Copy Button ─── */
 
   :global(.code-copy) {
@@ -382,47 +538,279 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
 
   .toc {
     position: fixed;
-    top: 96px;
+    z-index: 5;
+    top: 88px;
     right: max(calc((100vw - var(--layout-max)) / 2), 24px);
-    width: 200px;
-    max-height: calc(100vh - 140px);
-    overflow-y: auto;
+    width: 232px;
     font-size: var(--text-xs);
   }
 
-  .toc__label {
-    margin: 0 0 var(--space-2);
-    font-size: 0.65rem;
-    font-weight: 600;
+  .toc__toggle {
+    display: none;
+    width: 100%;
+    min-height: 54px;
+    padding: 9px var(--space-3);
+    color: var(--color-ink);
+    border: 1px solid var(--color-rule-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+  }
+
+  .toc__toggle-copy {
+    min-width: 0;
+    text-align: left;
+  }
+
+  .toc__toggle-label {
+    display: block;
+    margin-bottom: 2px;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-ink-tertiary);
   }
 
+  .toc__current-title {
+    display: block;
+    overflow: hidden;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-ink-secondary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .toc__toggle-count,
+  .toc__count {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: var(--color-ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .toc__toggle-icon {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    transition: transform var(--duration-fast) var(--ease-smooth);
+  }
+
+  .toc__toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  .toc__panel {
+    position: relative;
+    max-height: calc(100vh - 132px);
+    padding: var(--space-4);
+    overflow-y: auto;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-bg-elevated) 94%, var(--color-bg));
+    box-shadow: var(--shadow-md);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-rule-strong) transparent;
+  }
+
+  .toc__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+    padding: 0 var(--space-1) var(--space-2);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .toc__label {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink-tertiary);
+  }
+
   .toc__list {
+    position: relative;
+    display: grid;
+    gap: 2px;
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+
+  .toc__list::before {
+    content: "";
+    position: absolute;
+    top: 9px;
+    bottom: 9px;
+    left: 9px;
+    width: 1px;
+    background: var(--color-rule);
   }
 
   .toc__item {
     line-height: 1.4;
   }
 
-  .toc__item--2 { padding-left: 0; }
-  .toc__item--3 { padding-left: var(--space-3); }
-
   .toc__link {
-    display: block;
-    padding: 3px 0;
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.2em minmax(0, 1fr);
+    gap: var(--space-1);
+    align-items: start;
+    min-height: 30px;
+    padding: 6px 7px 6px 22px;
+    color: color-mix(in srgb, var(--color-ink-secondary) 78%, var(--color-ink-tertiary));
+    border-radius: var(--radius-sm);
+    transition:
+      color var(--duration-fast) var(--ease-smooth),
+      background-color var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-fast) var(--ease-smooth),
+      box-shadow var(--duration-fast) var(--ease-smooth);
+  }
+
+  .toc__link::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 6px;
+    width: 7px;
+    height: 7px;
+    border: 1px solid var(--color-rule-strong);
+    border-radius: 50%;
+    background: var(--color-bg-elevated);
+    transform: translateY(-50%);
+    transition:
+      border-color var(--duration-fast) var(--ease-smooth),
+      background-color var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-fast) var(--ease-smooth);
+  }
+
+  .toc__item--3 .toc__link {
+    padding-left: 32px;
+  }
+
+  .toc__index {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    line-height: 1.65;
+    letter-spacing: 0.04em;
     color: var(--color-ink-tertiary);
-    transition: color var(--duration-fast) var(--ease-smooth);
-    border-left: 2px solid transparent;
-    padding-left: var(--space-2);
+    opacity: 0.62;
+    transition: color var(--duration-fast) var(--ease-smooth), opacity var(--duration-fast) var(--ease-smooth);
+  }
+
+  .toc__text {
+    min-width: 0;
   }
 
   .toc__link:hover {
     color: var(--color-accent);
+    background: var(--color-accent-subtle);
+  }
+
+  .toc__link.is-active {
+    color: var(--color-ink);
+    background: var(--color-accent-subtle);
+    transform: translateX(3px);
+  }
+
+  .toc__link.is-active::before {
+    border-color: var(--color-accent);
+    border-radius: 1px;
+    background: var(--color-accent);
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  .toc__link.is-active .toc__index {
+    color: var(--color-accent);
+    opacity: 1;
+  }
+
+  .toc__link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+
+  /* ─── Crimson Nocturne TOC ─── */
+
+  :global(html[data-skin="nocturne"]) .toc__panel {
+    border-color: color-mix(in srgb, var(--color-accent) 36%, transparent);
+    border-radius: var(--radius-md);
+    background-color: color-mix(in srgb, var(--color-bg-elevated) 96%, var(--color-bg));
+    background-image: linear-gradient(145deg, rgba(255, 55, 111, 0.075), transparent 38%);
+    box-shadow: 5px 5px 0 rgba(88, 21, 47, 0.4), 0 14px 32px rgba(0, 0, 0, 0.22);
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  :global(html[data-skin="nocturne"]) .toc__panel::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 68px;
+    height: 58px;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 62% 22%, var(--color-bg) 0 3px, transparent 4px),
+      radial-gradient(circle at 78% 42%, var(--color-bg) 0 2px, transparent 3px),
+      radial-gradient(circle at 88% 17%, var(--color-bg) 0 1px, transparent 2px),
+      linear-gradient(135deg, transparent 0 47%, rgba(88, 21, 47, 0.72) 48%);
+    clip-path: polygon(100% 0, 100% 100%, 0 0);
+  }
+
+  :global(html[data-skin="nocturne"]) .toc__header {
+    border-bottom-color: color-mix(in srgb, var(--color-accent) 24%, transparent);
+  }
+
+  :global(html[data-skin="nocturne"]) .toc__label,
+  :global(html[data-skin="nocturne"]) .toc__count,
+  :global(html[data-skin="nocturne"]) .toc__toggle-count {
+    color: color-mix(in srgb, var(--color-accent) 78%, var(--color-ink));
+  }
+
+  :global(html[data-skin="nocturne"]) .toc__list::before {
+    width: 2px;
+    background: linear-gradient(transparent, rgba(255, 55, 111, 0.5) 18% 82%, transparent);
+  }
+
+  :global(html[data-skin="nocturne"]) .toc__link::before {
+    border-color: rgba(255, 91, 139, 0.35);
+    border-radius: 0;
+    background: var(--color-bg-elevated);
+  }
+
+  :global(html[data-skin="nocturne"]) .toc__link:hover {
+    color: var(--color-ink);
+    background: rgba(255, 55, 111, 0.09);
+  }
+
+  :global(html[data-skin="nocturne"]) .toc__link.is-active {
+    color: var(--color-ink);
+    background: linear-gradient(90deg, rgba(255, 55, 111, 0.2), rgba(255, 55, 111, 0.035));
+    box-shadow: 3px 3px 0 rgba(88, 21, 47, 0.34);
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+  }
+
+  :global(html[data-skin="nocturne"]) .toc__link.is-active::before {
+    width: 11px;
+    height: 13px;
+    border: 0;
+    background: var(--color-accent);
+    clip-path: polygon(0 50%, 100% 0, 68% 50%, 100% 100%);
+    transform: translateY(-50%);
   }
 
   /* ─── Prose ─── */
@@ -444,6 +832,7 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
     margin-top: var(--space-12);
     margin-bottom: var(--space-4);
     color: var(--color-ink);
+    scroll-margin-top: 112px;
   }
 
   .prose :global(h2) {
@@ -728,7 +1117,66 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
 
   @media (max-width: 1200px) {
     .toc {
+      position: sticky;
+      top: 72px;
+      right: auto;
+      width: min(100%, var(--prose-max));
+      max-height: none;
+      margin-bottom: var(--space-8);
+      overflow: visible;
+    }
+
+    .toc__toggle {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .toc__panel {
+      position: absolute;
+      top: calc(100% - 1px);
+      right: 0;
+      left: 0;
+      max-height: min(58vh, 520px);
+      padding: var(--space-3);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition:
+        opacity var(--duration-fast) var(--ease-smooth),
+        visibility var(--duration-fast) var(--ease-smooth),
+        transform var(--duration-fast) var(--ease-smooth);
+    }
+
+    .toc[data-open] .toc__panel {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .toc[data-open] .toc__toggle {
+      border-bottom-color: transparent;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    .toc[data-open] .toc__toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .toc__header {
       display: none;
+    }
+
+    :global(html[data-skin="nocturne"]) .toc__toggle {
+      border-color: color-mix(in srgb, var(--color-accent) 38%, transparent);
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg-elevated);
+      background-image: linear-gradient(100deg, rgba(255, 55, 111, 0.11), transparent 54%);
+      box-shadow: 4px 4px 0 rgba(88, 21, 47, 0.38);
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
     }
   }
 
@@ -739,6 +1187,23 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
 
     .article__title {
       font-size: var(--text-2xl);
+    }
+
+    .toc {
+      top: 68px;
+      margin-bottom: var(--space-6);
+    }
+
+    .toc__toggle {
+      min-height: 50px;
+      padding: 8px var(--space-3);
+    }
+
+    .prose :global(h1),
+    .prose :global(h2),
+    .prose :global(h3),
+    .prose :global(h4) {
+      scroll-margin-top: 136px;
     }
 
     .post-nav {
