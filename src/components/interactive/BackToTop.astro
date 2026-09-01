@@ -4,8 +4,12 @@
   aria-label="Back to top"
   title="Back to top"
 >
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <svg class="btt__icon btt__icon--arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M8 13V3M3 7l5-5 5 5" />
+  </svg>
+  <svg class="btt__icon btt__icon--tail" width="28" height="34" viewBox="0 0 28 34" aria-hidden="true">
+    <path class="btt__tail-stroke" d="M8.4 31.6c-4.1-2.9-4.2-8.4-1.1-12.1 2.8-3.4 8.3-3.1 11.4-6.7 2-2.3 2.7-5.2 1.6-8.1" />
+    <path class="btt__tail-tip" d="m20.1 1.2-5.7 6 6.1-.9 4.3 4.2-.4-8.5-4.3-.8Z" />
   </svg>
 </button>
 
@@ -59,13 +63,38 @@
     color: var(--color-ink-secondary);
     box-shadow: var(--shadow-sm);
     cursor: pointer;
+    isolation: isolate;
     opacity: 0;
     pointer-events: none;
     transform: translateY(12px);
     transition: opacity var(--duration-normal) var(--ease-smooth),
                 transform var(--duration-normal) var(--ease-smooth),
                 color var(--duration-fast) var(--ease-smooth),
-                border-color var(--duration-fast) var(--ease-smooth);
+                border-color var(--duration-fast) var(--ease-smooth),
+                background-color var(--duration-fast) var(--ease-smooth),
+                box-shadow var(--duration-fast) var(--ease-smooth);
+  }
+
+  .btt__icon {
+    display: block;
+    transition: transform var(--duration-normal) var(--ease-bounce);
+  }
+
+  .btt__icon--tail {
+    display: none;
+    overflow: visible;
+  }
+
+  .btt__tail-stroke {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.15;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .btt__tail-tip {
+    fill: currentColor;
   }
 
   .btt--visible {
@@ -77,5 +106,69 @@
   .btt:hover {
     color: var(--color-accent);
     border-color: var(--color-accent);
+  }
+
+  .btt:hover .btt__icon--arrow,
+  .btt:focus-visible .btt__icon--arrow {
+    transform: translateY(-2px);
+  }
+
+  .btt:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  :global(html[data-skin="nocturne"]) .btt {
+    width: 46px;
+    height: 50px;
+    border-color: color-mix(in srgb, var(--color-accent) 58%, transparent);
+    border-radius: 15px 3px 15px 3px;
+    color: var(--color-accent);
+    background:
+      linear-gradient(145deg, rgba(255, 55, 111, 0.13), transparent 52%),
+      var(--color-bg-elevated);
+    box-shadow:
+      3px 3px 0 rgba(88, 21, 47, 0.62),
+      inset 0 0 0 1px rgba(255, 179, 200, 0.04);
+  }
+
+  :global(html[data-skin="nocturne"]) .btt:hover,
+  :global(html[data-skin="nocturne"]) .btt:focus-visible {
+    color: #ff6c99;
+    border-color: var(--color-accent);
+    background:
+      linear-gradient(145deg, rgba(255, 55, 111, 0.23), transparent 56%),
+      var(--color-bg-elevated);
+    box-shadow:
+      4px 4px 0 rgba(88, 21, 47, 0.7),
+      inset 0 0 0 1px rgba(255, 179, 200, 0.08);
+  }
+
+  :global(html[data-skin="nocturne"]) .btt__icon--arrow {
+    display: none;
+  }
+
+  :global(html[data-skin="nocturne"]) .btt__icon--tail {
+    display: block;
+    transform-origin: 50% 88%;
+  }
+
+  :global(html[data-skin="nocturne"]) .btt:hover .btt__icon--tail,
+  :global(html[data-skin="nocturne"]) .btt:focus-visible .btt__icon--tail {
+    transform: translateY(-3px) rotate(-3deg);
+  }
+
+  @media (max-width: 640px) {
+    .btt {
+      right: var(--space-4);
+      bottom: var(--space-4);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btt,
+    .btt__icon {
+      transition: none;
+    }
   }
 </style>
