@@ -164,6 +164,9 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
     });
     var activeIndex = -1;
     var ticking = false;
+    // Keep the clicked entry stable while the browser performs a smooth anchor scroll.
+    var lockedTocIndex = -1;
+    var unlockTocTimer = 0;
 
     function setTocOpen(open) {
       if (!toc || !tocToggle) return;
@@ -217,8 +220,24 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
       keepActiveVisible(tocLinks[index]);
     }
 
+    function releaseTocLock() {
+      if (lockedTocIndex < 0) return;
+      lockedTocIndex = -1;
+      unlockTocTimer = 0;
+      syncActiveToc();
+    }
+
+    function scheduleTocUnlock(delay) {
+      if (unlockTocTimer) window.clearTimeout(unlockTocTimer);
+      unlockTocTimer = window.setTimeout(releaseTocLock, delay);
+    }
+
     function syncActiveToc() {
       if (!headingNodes.length) return;
+      if (lockedTocIndex >= 0) {
+        setActiveToc(lockedTocIndex);
+        return;
+      }
       var threshold = Math.min(180, window.innerHeight * 0.22);
       var nextIndex = 0;
       headingNodes.forEach(function (heading, index) {
@@ -261,7 +280,9 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
 
     tocLinks.forEach(function (link, index) {
       link.addEventListener("click", function () {
+        lockedTocIndex = index;
         setActiveToc(index);
+        scheduleTocUnlock(500);
         if (tocMedia.matches) setTocOpen(false);
       });
     });
@@ -274,7 +295,10 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
     });
 
     tocMedia.addEventListener("change", syncTocMode);
-    window.addEventListener("scroll", requestReadingUpdate, { passive: true });
+    window.addEventListener("scroll", function () {
+      requestReadingUpdate();
+      if (lockedTocIndex >= 0) scheduleTocUnlock(180);
+    }, { passive: true });
     window.addEventListener("resize", requestReadingUpdate);
     window.addEventListener("hashchange", requestReadingUpdate);
     syncTocMode();
@@ -540,8 +564,8 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
     position: fixed;
     z-index: 5;
     top: 88px;
-    right: max(calc((100vw - var(--layout-max)) / 2), 24px);
-    width: 232px;
+    right: max(calc((100vw - var(--layout-max)) / 2 - 88px), 24px);
+    width: 288px;
     font-size: var(--text-xs);
   }
 
@@ -666,9 +690,9 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
   .toc__link {
     position: relative;
     display: grid;
-    grid-template-columns: 2.2em minmax(0, 1fr);
-    gap: var(--space-1);
-    align-items: start;
+    grid-template-columns: 2ch minmax(0, 1fr);
+    column-gap: var(--space-2);
+    align-items: baseline;
     min-height: 30px;
     padding: 6px 7px 6px 22px;
     color: color-mix(in srgb, var(--color-ink-secondary) 78%, var(--color-ink-tertiary));
@@ -676,7 +700,6 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
     transition:
       color var(--duration-fast) var(--ease-smooth),
       background-color var(--duration-fast) var(--ease-smooth),
-      transform var(--duration-fast) var(--ease-smooth),
       box-shadow var(--duration-fast) var(--ease-smooth);
   }
 
@@ -698,14 +721,14 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
       transform var(--duration-fast) var(--ease-smooth);
   }
 
-  .toc__item--3 .toc__link {
-    padding-left: 32px;
-  }
-
   .toc__index {
+    width: 2ch;
+    justify-self: end;
+    text-align: right;
     font-family: var(--font-mono);
     font-size: 0.58rem;
-    line-height: 1.65;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.45;
     letter-spacing: 0.04em;
     color: var(--color-ink-tertiary);
     opacity: 0.62;
@@ -713,7 +736,15 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
   }
 
   .toc__text {
+    display: block;
     min-width: 0;
+    line-height: 1.45;
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+  }
+
+  .toc__item--3 .toc__text {
+    padding-left: var(--space-2);
   }
 
   .toc__link:hover {
@@ -724,7 +755,6 @@ const tocTotal = String(tocHeadings.length).padStart(2, "0");
   .toc__link.is-active {
     color: var(--color-ink);
     background: var(--color-accent-subtle);
-    transform: translateX(3px);
   }
 
   .toc__link.is-active::before {
