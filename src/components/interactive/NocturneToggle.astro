@@ -1,0 +1,218 @@
+---
+---
+
+<button
+  class="nocturne-toggle"
+  id="nocturne-toggle"
+  type="button"
+  aria-label="进入绯红夜曲"
+  aria-pressed="false"
+  title="Crimson Nocturne"
+>
+  <svg
+    class="nocturne-toggle__icon"
+    width="22"
+    height="22"
+    viewBox="0 0 28 28"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path class="nocturne-toggle__horn" d="M10.2 7.3C7.2 7 5.1 5.2 4.3 2.2c3.4.5 5.9 2.1 7.1 4.6" />
+    <path class="nocturne-toggle__horn" d="M17.8 7.3c3-.3 5.1-2.1 5.9-5.1-3.4.5-5.9 2.1-7.1 4.6" />
+    <path class="nocturne-toggle__face" d="M7.2 9.2c2.2-1.7 11.4-1.7 13.6 0l-.8 8.2c-.4 4-3 6.2-6 6.2s-5.6-2.2-6-6.2l-.8-8.2Z" />
+    <path class="nocturne-toggle__eye" d="m9.1 13 3.3.6-2.8 2.1-.5-2.7Zm9.8 0-3.3.6 2.8 2.1.5-2.7Z" />
+    <path class="nocturne-toggle__grin" d="M9.8 18.2c2.7 1.7 5.7 1.7 8.4 0-1.2 2.3-2.5 3.2-4.2 3.2s-3-.9-4.2-3.2Z" />
+    <path class="nocturne-toggle__tooth" d="m11.6 19.2.8 1.5.7-1.1m3.3-.4-.8 1.5-.7-1.1" />
+    <path class="nocturne-toggle__tail" d="M20.4 21.1c3.3 1.1 4.8-.4 3.8-2.2-.8-1.3-2.7-.6-2.1.8" />
+  </svg>
+</button>
+
+<script is:inline>
+  (function () {
+    var button = document.getElementById("nocturne-toggle");
+    if (!button || button.dataset.init) return;
+    button.dataset.init = "true";
+
+    var root = document.documentElement;
+    var storageKey = "somlar-skin";
+    var transitioning = false;
+
+    function isNocturne() {
+      return root.dataset.skin === "nocturne";
+    }
+
+    function syncControls() {
+      var active = isNocturne();
+      button.setAttribute("aria-pressed", String(active));
+      button.setAttribute("aria-label", active ? "退出绯红夜曲" : "进入绯红夜曲");
+      button.title = active ? "Return to the standard theme" : "Enter Crimson Nocturne";
+
+      var standardToggle = document.getElementById("theme-toggle");
+      if (standardToggle) standardToggle.hidden = active;
+    }
+
+    function applySkin(next) {
+      if (next) {
+        root.dataset.skin = "nocturne";
+      } else {
+        delete root.dataset.skin;
+      }
+
+      try {
+        if (next) localStorage.setItem(storageKey, "nocturne");
+        else localStorage.removeItem(storageKey);
+      } catch (error) {
+        // The visual state still works when storage is unavailable.
+      }
+
+      syncControls();
+      window.dispatchEvent(new CustomEvent("somlar:skinchange", { detail: { skin: next ? "nocturne" : "standard" } }));
+    }
+
+    button.addEventListener("click", function () {
+      if (transitioning) return;
+      transitioning = true;
+      button.disabled = true;
+
+      var next = !isNocturne();
+      var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var rect = button.getBoundingClientRect();
+      root.style.setProperty("--theme-x", rect.left + rect.width / 2 + "px");
+      root.style.setProperty("--theme-y", rect.top + rect.height / 2 + "px");
+
+      function release() {
+        root.classList.remove("nocturne-transition");
+        button.disabled = false;
+        transitioning = false;
+      }
+
+      if (!reduceMotion && document.startViewTransition) {
+        root.classList.add("nocturne-transition");
+        var transition = document.startViewTransition(function () {
+          applySkin(next);
+        });
+        transition.finished.then(release, release);
+      } else {
+        applySkin(next);
+        release();
+      }
+    });
+
+    syncControls();
+  })();
+</script>
+
+<style>
+  .nocturne-toggle {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-full);
+    color: var(--color-ink-secondary);
+    background: transparent;
+    cursor: pointer;
+    isolation: isolate;
+    transition:
+      color var(--duration-fast) var(--ease-smooth),
+      border-color var(--duration-fast) var(--ease-smooth),
+      background-color var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-fast) var(--ease-bounce),
+      box-shadow var(--duration-fast) var(--ease-smooth);
+  }
+
+  .nocturne-toggle::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--color-accent-subtle);
+    opacity: 0;
+    transform: scale(0.72) rotate(-8deg);
+    transition:
+      opacity var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-normal) var(--ease-bounce);
+  }
+
+  .nocturne-toggle:hover,
+  .nocturne-toggle:focus-visible {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    transform: translateY(-1px) rotate(-2deg);
+  }
+
+  .nocturne-toggle:hover::before,
+  .nocturne-toggle:focus-visible::before,
+  .nocturne-toggle[aria-pressed="true"]::before {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+
+  .nocturne-toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  .nocturne-toggle:disabled {
+    cursor: wait;
+  }
+
+  .nocturne-toggle__icon {
+    overflow: visible;
+    filter: drop-shadow(0 0 0 transparent);
+    transition:
+      transform var(--duration-normal) var(--ease-bounce),
+      filter var(--duration-normal) var(--ease-smooth);
+  }
+
+  .nocturne-toggle:hover .nocturne-toggle__icon {
+    transform: scale(1.08);
+  }
+
+  .nocturne-toggle__horn,
+  .nocturne-toggle__face,
+  .nocturne-toggle__tooth,
+  .nocturne-toggle__tail {
+    stroke: currentColor;
+    stroke-width: 1.35;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .nocturne-toggle__face {
+    fill: color-mix(in srgb, var(--color-bg-elevated) 84%, transparent);
+  }
+
+  .nocturne-toggle__eye,
+  .nocturne-toggle__grin {
+    fill: currentColor;
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-toggle {
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 78%, transparent);
+    border-radius: 7px 2px 7px 2px;
+    background: rgba(255, 55, 111, 0.09);
+    box-shadow: 3px 3px 0 rgba(125, 28, 73, 0.55);
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-toggle__icon {
+    filter: drop-shadow(0 0 5px rgba(255, 55, 111, 0.55));
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-toggle__eye {
+    color: #fff7dc;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nocturne-toggle,
+    .nocturne-toggle::before,
+    .nocturne-toggle__icon {
+      transition: none;
+    }
+  }
+</style>

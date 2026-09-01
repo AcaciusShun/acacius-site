@@ -98,6 +98,24 @@ const analyticsEnabled = Boolean(siteConfig.analytics.measurementId);
     color: var(--color-accent);
   }
 
+  :global(html[data-skin="nocturne"]) .footer {
+    border-top-color: color-mix(in srgb, var(--color-accent) 32%, transparent);
+    background: linear-gradient(180deg, rgba(9, 11, 24, 0.1), rgba(9, 11, 24, 0.72));
+  }
+
+  :global(html[data-skin="nocturne"]) .footer__brand {
+    font-family: var(--font-body);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    text-shadow: 2px 2px 0 rgba(255, 55, 111, 0.32);
+  }
+
+  :global(html[data-skin="nocturne"]) .footer__divider {
+    color: var(--color-accent);
+  }
+
   @media (max-width: 480px) {
     .footer__inner {
       flex-direction: column;

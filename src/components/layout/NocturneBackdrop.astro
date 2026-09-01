@@ -1,0 +1,96 @@
+---
+---
+
+<div class="nocturne-backdrop" aria-hidden="true" transition:persist="nocturne-backdrop">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="none" focusable="false">
+    <g class="nocturne-backdrop__vines">
+      <path d="M-50 864C116 826 136 714 269 735c106 17 104 106 219 82 86-18 94-81 176-88" />
+      <path d="M40 900c61-84 37-158 123-211 69-42 143-9 166-91 14-51-13-99 42-143" />
+      <path d="M1490 848c-166-23-203-123-325-80-102 36-73 126-203 114-92-9-122-73-207-59" />
+      <path d="M1401 900c-43-98 9-162-60-230-55-54-139-31-145-116-4-54 35-91-6-151" />
+    </g>
+    <g class="nocturne-backdrop__thorns">
+      <path d="m118 749 19-47 17 35m78 13 43-27-7 38m79-113 47-18-23 38m636 141 40-29-3 40m92-68 46-21-19 40m107-110 17-46 18 37" />
+      <path d="m24 838 34-18-13 34m412-47 37-18-17 35m517 42 35-24-9 37m382-72 30-29-2 39" />
+    </g>
+    <g class="nocturne-backdrop__embers">
+      <path d="M92 635c22-28 24-48 4-72-15 25-41 40-29 71 5 14 16 18 25 1Z" />
+      <path d="M1334 585c18-25 18-43-1-63-11 23-33 38-20 63 6 11 14 13 21 0Z" />
+      <path d="M560 822c13-18 12-31-2-45-8 16-24 28-14 45 4 8 11 9 16 0Z" />
+    </g>
+  </svg>
+</div>
+
+<style>
+  .nocturne-backdrop {
+    position: fixed;
+    inset: 64px 0 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    overflow: hidden;
+    transition: opacity var(--duration-slow) var(--ease-smooth);
+  }
+
+  .nocturne-backdrop svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .nocturne-backdrop__vines,
+  .nocturne-backdrop__thorns {
+    fill: none;
+    stroke: rgba(255, 55, 111, 0.18);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .nocturne-backdrop__thorns {
+    stroke: rgba(160, 62, 117, 0.22);
+    stroke-width: 1.5;
+  }
+
+  .nocturne-backdrop__embers {
+    fill: rgba(255, 55, 111, 0.12);
+    stroke: rgba(255, 91, 139, 0.22);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-backdrop {
+    opacity: 1;
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-backdrop__vines,
+  :global(html[data-skin="nocturne"]) .nocturne-backdrop__thorns {
+    stroke-dasharray: 1650;
+    stroke-dashoffset: 1650;
+    animation: nocturne-vine-spread 1.15s var(--ease-smooth) 120ms forwards;
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-backdrop__thorns {
+    animation-delay: 300ms;
+  }
+
+  @keyframes nocturne-vine-spread {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @media (max-width: 640px) {
+    .nocturne-backdrop {
+      opacity: 0 !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nocturne-backdrop,
+    .nocturne-backdrop__vines,
+    .nocturne-backdrop__thorns {
+      transition: none;
+      animation: none !important;
+      stroke-dashoffset: 0 !important;
+    }
+  }
+</style>

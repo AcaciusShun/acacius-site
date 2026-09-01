@@ -80,9 +80,18 @@ const socialImage = new URL(ogImage ?? "/og-default.png", siteConfig.url).href;
 
     <script is:inline>
       (function () {
-        var t = localStorage.getItem("theme");
-        if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-          document.documentElement.classList.add("dark");
+        try {
+          var t = localStorage.getItem("theme");
+          if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+            document.documentElement.classList.add("dark");
+          }
+          if (localStorage.getItem("somlar-skin") === "nocturne") {
+            document.documentElement.dataset.skin = "nocturne";
+          }
+        } catch (error) {
+          if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            document.documentElement.classList.add("dark");
+          }
         }
       })();
     </script>
