@@ -204,14 +204,14 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
     font-family: var(--font-mono);
     font-size: 0.7rem;
     line-height: 1;
-    color: var(--color-ink-secondary);
+    color: var(--color-code-caption);
     background: var(--color-code-toolbar);
     border: 1px solid var(--color-code-block-border);
     border-radius: 7px;
     box-shadow: 0 2px 8px var(--color-shadow);
     backdrop-filter: blur(8px);
     cursor: pointer;
-    opacity: 0.72;
+    opacity: 0.9;
     transition: opacity var(--duration-fast) var(--ease-smooth),
                 color var(--duration-fast) var(--ease-smooth),
                 border-color var(--duration-fast) var(--ease-smooth),
@@ -502,21 +502,34 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
     padding: 2px 6px;
     background: var(--color-code-bg);
     color: var(--color-code-text);
+    border: 1px solid var(--color-code-inline-border);
     border-radius: 4px;
   }
 
   .prose :global(pre) {
     position: relative;
     margin: var(--space-6) 0;
-    padding: 3.25rem var(--space-6) var(--space-4);
+    padding: 3.5rem var(--space-6) var(--space-5, 1.25rem);
     border-radius: var(--radius-md);
     overflow-x: auto;
     font-size: var(--text-sm);
-    line-height: 1.6;
+    line-height: 1.7;
+    color: var(--color-code-block-text) !important;
     border: 1px solid var(--color-code-block-border);
-    background: var(--color-code-block-bg) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), var(--shadow-sm);
-    scrollbar-color: var(--color-rule-strong) transparent;
+    border-left: 3px solid var(--color-code-accent);
+    background: linear-gradient(
+      to bottom,
+      var(--color-code-toolbar) 0 42px,
+      var(--color-code-block-bg) 42px
+    ) !important;
+    box-shadow: 0 10px 28px var(--color-shadow);
+    scrollbar-color: var(--color-code-accent) var(--color-code-toolbar);
+    tab-size: 2;
+  }
+
+  .prose :global(pre:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
   }
 
   .prose :global(pre::before) {
@@ -529,29 +542,47 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
     line-height: 1;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-ink-tertiary);
+    z-index: 1;
+    color: var(--color-code-caption);
+    font-weight: 600;
   }
 
-  :global(.dark) .prose :global(.astro-code) {
+  :global(.dark) .prose :global(.astro-code),
+  :global(html[data-skin="nocturne"]) .prose :global(.astro-code) {
     color: var(--shiki-dark) !important;
-    background-color: var(--color-code-block-bg) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), var(--shadow-sm);
   }
 
-  :global(.dark) .prose :global(.astro-code span) {
+  :global(.dark) .prose :global(.astro-code span),
+  :global(html[data-skin="nocturne"]) .prose :global(.astro-code span) {
     color: var(--shiki-dark) !important;
   }
 
   .prose :global(pre code) {
+    display: block;
+    width: max-content;
+    min-width: 100%;
     padding: 0;
     background: none;
     color: inherit;
+    border: 0;
     border-radius: 0;
+  }
+
+  .prose :global(pre code::selection),
+  .prose :global(pre code *::selection) {
+    color: var(--color-code-block-text);
+    background: var(--color-code-selection);
+  }
+
+  :global(html[data-skin="nocturne"]) .prose :global(pre) {
+    box-shadow: 6px 6px 0 rgba(88, 21, 47, 0.42), 0 14px 34px rgba(0, 0, 0, 0.28);
   }
 
   @media (max-width: 640px) {
     .prose :global(pre) {
-      padding: 3rem var(--space-4) var(--space-4);
+      margin-inline: calc(-1 * var(--space-2));
+      padding: 3.25rem var(--space-4) var(--space-4);
+      font-size: 0.8rem;
     }
 
     .prose :global(pre::before) {
