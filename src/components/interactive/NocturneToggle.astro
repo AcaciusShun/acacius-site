@@ -230,6 +230,8 @@
     place-items: center;
     width: 38px;
     height: 38px;
+    flex: 0 0 38px;
+    box-sizing: border-box;
     padding: 0;
     border: 1px solid rgba(229, 28, 70, 0.68);
     border-radius: 12px;
@@ -239,14 +241,13 @@
       #fff8f4;
     box-shadow:
       0 0 0 3px rgba(229, 28, 70, 0.08),
-      2px 3px 0 rgba(128, 18, 52, 0.22);
+      3px 3px 0 rgba(128, 18, 52, 0.22);
     cursor: pointer;
     isolation: isolate;
     overflow: visible;
     transition:
       border-color var(--duration-fast) var(--ease-smooth),
       background-color var(--duration-fast) var(--ease-smooth),
-      transform var(--duration-fast) var(--ease-bounce),
       box-shadow var(--duration-fast) var(--ease-smooth);
   }
 
@@ -268,10 +269,9 @@
   .nocturne-toggle:focus-visible,
   .nocturne-toggle[data-hover-lock="true"] {
     border-color: #ff315f;
-    transform: translateY(-1px);
     box-shadow:
       0 0 0 4px rgba(229, 28, 70, 0.12),
-      3px 4px 0 rgba(128, 18, 52, 0.25);
+      3px 3px 0 rgba(128, 18, 52, 0.25);
   }
 
   .nocturne-toggle:hover::before,
@@ -290,7 +290,7 @@
   .nocturne-toggle__icon {
     display: block;
     overflow: visible;
-    transform-origin: 50% 55%;
+    transform-origin: 50% 50%;
     transition:
       transform var(--duration-normal) var(--ease-bounce),
       filter var(--duration-normal) var(--ease-smooth);
@@ -318,13 +318,13 @@
   .nocturne-toggle:hover .nocturne-toggle__icon,
   .nocturne-toggle:focus-visible .nocturne-toggle__icon,
   .nocturne-toggle[data-hover-lock="true"] .nocturne-toggle__icon {
-    transform: scale(1.07) rotate(-3deg);
+    transform: scale(1.06);
   }
 
   :global(html[data-skin="nocturne"]) .nocturne-toggle {
     color: #fff1b8;
     border-color: rgba(255, 241, 184, 0.86);
-    border-radius: 50%;
+    border-radius: 12px;
     background:
       radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.18), transparent 44%),
       rgba(22, 24, 43, 0.96);
@@ -346,17 +346,10 @@
   :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible,
   :global(html[data-skin="nocturne"]) .nocturne-toggle[data-hover-lock="true"] {
     border-color: #fff6cf;
-    transform: translateY(-1px);
     box-shadow:
       0 0 0 4px rgba(255, 241, 184, 0.13),
       0 0 22px rgba(255, 224, 128, 0.27),
-      4px 4px 0 rgba(88, 21, 47, 0.52);
-  }
-
-  :global(html[data-skin="nocturne"]) .nocturne-toggle:hover .nocturne-toggle__icon,
-  :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible .nocturne-toggle__icon,
-  :global(html[data-skin="nocturne"]) .nocturne-toggle[data-hover-lock="true"] .nocturne-toggle__icon {
-    transform: translateY(-1px) scale(1.06);
+      3px 3px 0 rgba(88, 21, 47, 0.52);
   }
 
   @media (prefers-reduced-motion: reduce) {
