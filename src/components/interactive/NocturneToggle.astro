@@ -76,18 +76,23 @@
 
       var next = !isNocturne();
       var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var transitionMode = next ? "nocturne-transition--enter" : "nocturne-transition--exit";
       var rect = button.getBoundingClientRect();
       root.style.setProperty("--theme-x", rect.left + rect.width / 2 + "px");
       root.style.setProperty("--theme-y", rect.top + rect.height / 2 + "px");
 
       function release() {
-        root.classList.remove("nocturne-transition");
+        root.classList.remove(
+          "nocturne-transition",
+          "nocturne-transition--enter",
+          "nocturne-transition--exit"
+        );
         button.disabled = false;
         transitioning = false;
       }
 
       if (!reduceMotion && document.startViewTransition) {
-        root.classList.add("nocturne-transition");
+        root.classList.add("nocturne-transition", transitionMode);
         var transition = document.startViewTransition(function () {
           applySkin(next);
         });

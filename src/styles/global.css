@@ -262,14 +262,24 @@ img {
   animation-name: fade-in;
 }
 
-html.nocturne-transition::view-transition-old(root) {
+html.nocturne-transition--enter::view-transition-old(root) {
   z-index: 1;
   animation: none;
 }
 
-html.nocturne-transition::view-transition-new(root) {
+html.nocturne-transition--enter::view-transition-new(root) {
   z-index: 2;
-  animation: nocturne-spread 650ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: nocturne-spread 900ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+html.nocturne-transition--exit::view-transition-old(root) {
+  z-index: 2;
+  animation: nocturne-spread 900ms cubic-bezier(0.32, 0.72, 0, 1) reverse both;
+}
+
+html.nocturne-transition--exit::view-transition-new(root) {
+  z-index: 1;
+  animation: none;
 }
 
 @keyframes fade-out {
