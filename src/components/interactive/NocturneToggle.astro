@@ -9,8 +9,55 @@
   aria-pressed="false"
   title="Crimson Nocturne"
 >
-  <span class="nocturne-toggle__emoji nocturne-toggle__emoji--devil" aria-hidden="true">😈</span>
-  <span class="nocturne-toggle__emoji nocturne-toggle__emoji--angel" aria-hidden="true">😇</span>
+  <svg
+    class="nocturne-toggle__icon"
+    width="25"
+    height="25"
+    viewBox="0 0 32 32"
+    fill="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <g class="nocturne-toggle__mark nocturne-toggle__mark--devil" data-nocturne-mark="devil">
+      <path
+        class="nocturne-toggle__devil-solid"
+        d="M11.8 9.2C7.6 9 4.8 6.3 4.2 2.3c3.7.8 6.4 2.6 8.1 5.6l-.5 1.3Zm8.4 0c4.2-.2 7-2.9 7.6-6.9-3.7.8-6.4 2.6-8.1 5.6l.5 1.3ZM7.7 11.5c3-2.6 13.6-2.6 16.6 0l-1 9.2c-.5 5.1-3.4 7.6-7.3 7.6s-6.8-2.5-7.3-7.6l-1-9.2Z"
+      />
+      <path
+        class="nocturne-toggle__devil-cut"
+        d="m10.3 15 4.5 1-3.8 2.7-.7-3.7Zm11.4 0-4.5 1 3.8 2.7.7-3.7ZM10.8 21c3.2 2.3 7.2 2.3 10.4 0-.9 3.8-2.8 5.4-5.2 5.4s-4.3-1.6-5.2-5.4Z"
+      />
+      <path
+        class="nocturne-toggle__devil-fang"
+        d="m12.7 22.2 1.8.7-.9 1.7-.9-2.4Zm6.6 0-1.8.7.9 1.7.9-2.4Z"
+      />
+      <path
+        class="nocturne-toggle__devil-tail"
+        d="M22.9 25c3.9 1.5 6-.6 4.6-2.9-.8-1.4-3-.7-2.5.9m2.1-3.2.5 3.3-3.1-1"
+      />
+    </g>
+
+    <g
+      class="nocturne-toggle__mark nocturne-toggle__mark--angel"
+      data-nocturne-mark="angel"
+      display="none"
+    >
+      <ellipse class="nocturne-toggle__halo" cx="16" cy="4.4" rx="7.1" ry="2.2" />
+      <path
+        class="nocturne-toggle__wing"
+        d="M9.7 14.1c-3-3.4-6.7-2.7-6.6 1 .1 2.8 2.4 4.8 5.8 5-2.1 1.5-2.8 3.4-1.7 5.2 2.6-.5 4.7-2.5 5.5-5.3m9.6-5.9c3-3.4 6.7-2.7 6.6 1-.1 2.8-2.4 4.8-5.8 5 2.1 1.5 2.8 3.4 1.7 5.2-2.6-.5-4.7-2.5-5.5-5.3"
+      />
+      <path
+        class="nocturne-toggle__angel-face"
+        d="M9.2 10.6c2.7-2 10.9-2 13.6 0l-.6 9.2c-.3 4.1-2.8 6.6-6.2 6.6s-5.9-2.5-6.2-6.6l-.6-9.2Z"
+      />
+      <path
+        class="nocturne-toggle__angel-detail"
+        d="M11.4 15.9c1.1.9 2.3.9 3.4 0m2.4 0c1.1.9 2.3.9 3.4 0m-7.3 4.4c1.7 1.2 3.7 1.2 5.4 0"
+      />
+      <path class="nocturne-toggle__shine" d="M25.4 6.8v3.6m-1.8-1.8h3.6" />
+    </g>
+  </svg>
 </button>
 
 <script is:inline>
@@ -22,6 +69,8 @@
     var root = document.documentElement;
     var storageKey = "somlar-skin";
     var transitioning = false;
+    var devilMark = button.querySelector('[data-nocturne-mark="devil"]');
+    var angelMark = button.querySelector('[data-nocturne-mark="angel"]');
 
     function isNocturne() {
       return root.dataset.skin === "nocturne";
@@ -32,6 +81,9 @@
       button.setAttribute("aria-pressed", String(active));
       button.setAttribute("aria-label", active ? "退出绯红夜曲" : "进入绯红夜曲");
       button.title = active ? "Return to the standard theme" : "Enter Crimson Nocturne";
+      button.dataset.mark = active ? "angel" : "devil";
+      if (devilMark) devilMark.setAttribute("display", active ? "none" : "inline");
+      if (angelMark) angelMark.setAttribute("display", active ? "inline" : "none");
 
       var standardToggle = document.getElementById("theme-toggle");
       if (standardToggle) standardToggle.hidden = active;
@@ -103,7 +155,7 @@
     padding: 0;
     border: 1px solid rgba(255, 55, 111, 0.86);
     border-radius: 11px 5px 11px 5px;
-    color: #fff;
+    color: #fff7dc;
     background:
       linear-gradient(145deg, rgba(255, 255, 255, 0.18), transparent 42%),
       linear-gradient(145deg, #ed2c63, #8e153f);
@@ -159,44 +211,81 @@
     cursor: wait;
   }
 
-  .nocturne-toggle__emoji {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-    font-size: 21px;
-    line-height: 1;
+  .nocturne-toggle__icon {
+    display: block;
+    overflow: visible;
     transform-origin: 50% 55%;
     transition:
-      opacity var(--duration-fast) var(--ease-smooth),
       transform var(--duration-normal) var(--ease-bounce),
       filter var(--duration-normal) var(--ease-smooth);
   }
 
-  .nocturne-toggle__emoji--devil {
-    opacity: 1;
+  .nocturne-toggle__devil-solid {
+    fill: currentColor;
+  }
+
+  .nocturne-toggle__devil-cut {
+    fill: #68102f;
+  }
+
+  .nocturne-toggle__devil-fang {
+    fill: #fff7dc;
+  }
+
+  .nocturne-toggle__devil-tail,
+  .nocturne-toggle__halo,
+  .nocturne-toggle__wing,
+  .nocturne-toggle__angel-face,
+  .nocturne-toggle__angel-detail,
+  .nocturne-toggle__shine {
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .nocturne-toggle__devil-tail {
+    fill: none;
+    stroke-width: 1.55;
+  }
+
+  .nocturne-toggle__halo {
+    fill: rgba(255, 241, 184, 0.08);
+    stroke-width: 1.5;
+  }
+
+  .nocturne-toggle__wing {
+    fill: rgba(255, 241, 184, 0.1);
+    stroke-width: 1.35;
+  }
+
+  .nocturne-toggle__angel-face {
+    fill: rgba(22, 24, 43, 0.9);
+    stroke-width: 1.45;
+  }
+
+  .nocturne-toggle__angel-detail,
+  .nocturne-toggle__shine {
+    fill: none;
+    stroke-width: 1.35;
+  }
+
+  .nocturne-toggle__mark--devil {
     filter: drop-shadow(0 1px 1px rgba(41, 5, 22, 0.66));
-    transform: scale(1) rotate(-3deg);
+    transform-origin: 50% 55%;
   }
 
-  .nocturne-toggle__emoji--angel {
-    opacity: 0;
-    filter: drop-shadow(0 0 0 transparent);
-    transform: scale(0.58) rotate(14deg);
+  .nocturne-toggle__mark--angel {
+    filter: drop-shadow(0 0 4px rgba(255, 238, 166, 0.32));
+    transform-origin: 50% 52%;
   }
 
-  .nocturne-toggle:hover .nocturne-toggle__emoji--devil,
-  .nocturne-toggle:focus-visible .nocturne-toggle__emoji--devil {
-    transform: scale(1.1) rotate(-5deg);
-  }
-
-  .nocturne-toggle[aria-pressed="true"] .nocturne-toggle__emoji--devil {
-    opacity: 0;
-    transform: scale(0.58) rotate(-16deg);
+  .nocturne-toggle:hover .nocturne-toggle__icon,
+  .nocturne-toggle:focus-visible .nocturne-toggle__icon {
+    transform: scale(1.07) rotate(-3deg);
   }
 
   :global(html[data-skin="nocturne"]) .nocturne-toggle {
+    color: #fff1b8;
     border-color: rgba(255, 241, 184, 0.86);
     border-radius: 50%;
     background:
@@ -226,21 +315,15 @@
       4px 4px 0 rgba(88, 21, 47, 0.52);
   }
 
-  :global(html[data-skin="nocturne"]) .nocturne-toggle__emoji--angel {
-    opacity: 1;
-    filter: drop-shadow(0 0 5px rgba(255, 238, 166, 0.38));
-    transform: scale(1) rotate(0);
-  }
-
-  :global(html[data-skin="nocturne"]) .nocturne-toggle:hover .nocturne-toggle__emoji--angel,
-  :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible .nocturne-toggle__emoji--angel {
-    transform: translateY(-1px) scale(1.08);
+  :global(html[data-skin="nocturne"]) .nocturne-toggle:hover .nocturne-toggle__icon,
+  :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible .nocturne-toggle__icon {
+    transform: translateY(-1px) scale(1.06);
   }
 
   @media (prefers-reduced-motion: reduce) {
     .nocturne-toggle,
     .nocturne-toggle::before,
-    .nocturne-toggle__emoji {
+    .nocturne-toggle__icon {
       transition: none;
     }
   }
