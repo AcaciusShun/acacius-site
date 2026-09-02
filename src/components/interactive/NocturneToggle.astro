@@ -77,8 +77,14 @@
     var root = document.documentElement;
     var storageKey = "somlar-skin";
     var transitioning = false;
+    var queuedToggle = false;
+    var transitionHitbox = null;
     var devilMark = button.querySelector('[data-nocturne-mark="devil"]');
     var angelMark = button.querySelector('[data-nocturne-mark="angel"]');
+
+    button.addEventListener("pointerleave", function () {
+      if (!transitioning) delete button.dataset.hoverLock;
+    });
 
     function isNocturne() {
       return root.dataset.skin === "nocturne";
@@ -121,26 +127,60 @@
       window.dispatchEvent(new CustomEvent("somlar:skinchange", { detail: { skin: next ? "nocturne" : "standard" } }));
     }
 
-    button.addEventListener("click", function () {
-      if (transitioning) return;
+    function queueToggle() {
+      queuedToggle = !queuedToggle;
+      if (queuedToggle) button.dataset.queued = "true";
+      else delete button.dataset.queued;
+    }
+
+    function beginTransition() {
+      if (button.matches(":hover")) button.dataset.hoverLock = "true";
       transitioning = true;
-      button.disabled = true;
+      button.dataset.transitioning = "true";
+      button.setAttribute("aria-busy", "true");
 
       var next = !isNocturne();
       var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       var transitionMode = next ? "nocturne-transition--enter" : "nocturne-transition--exit";
       var rect = button.getBoundingClientRect();
+      transitionHitbox = {
+        left: rect.left - 4,
+        right: rect.right + 4,
+        top: rect.top - 4,
+        bottom: rect.bottom + 4
+      };
       root.style.setProperty("--theme-x", rect.left + rect.width / 2 + "px");
       root.style.setProperty("--theme-y", rect.top + rect.height / 2 + "px");
 
+      var released = false;
+
       function release() {
+        if (released) return;
+        released = true;
         root.classList.remove(
           "nocturne-transition",
           "nocturne-transition--enter",
           "nocturne-transition--exit"
         );
-        button.disabled = false;
+        delete button.dataset.transitioning;
+        button.removeAttribute("aria-busy");
         transitioning = false;
+        transitionHitbox = null;
+
+        var shouldToggleAgain = queuedToggle;
+        queuedToggle = false;
+        delete button.dataset.queued;
+
+        requestAnimationFrame(function () {
+          if (shouldToggleAgain) {
+            beginTransition();
+            return;
+          }
+
+          setTimeout(function () {
+            if (!button.matches(":hover")) delete button.dataset.hoverLock;
+          }, 50);
+        });
       }
 
       if (!reduceMotion && document.startViewTransition) {
@@ -153,7 +193,31 @@
         applySkin(next);
         release();
       }
+    }
+
+    button.addEventListener("click", function () {
+      if (transitioning) {
+        queueToggle();
+        return;
+      }
+
+      beginTransition();
     });
+
+    document.addEventListener("click", function (event) {
+      if (!transitioning || !transitionHitbox || event.target === button || button.contains(event.target)) return;
+
+      if (
+        event.clientX >= transitionHitbox.left &&
+        event.clientX <= transitionHitbox.right &&
+        event.clientY >= transitionHitbox.top &&
+        event.clientY <= transitionHitbox.bottom
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        queueToggle();
+      }
+    }, true);
 
     syncControls();
   })();
@@ -201,7 +265,8 @@
   }
 
   .nocturne-toggle:hover,
-  .nocturne-toggle:focus-visible {
+  .nocturne-toggle:focus-visible,
+  .nocturne-toggle[data-hover-lock="true"] {
     border-color: #ff315f;
     transform: translateY(-1px);
     box-shadow:
@@ -211,6 +276,7 @@
 
   .nocturne-toggle:hover::before,
   .nocturne-toggle:focus-visible::before,
+  .nocturne-toggle[data-hover-lock="true"]::before,
   .nocturne-toggle[aria-pressed="true"]::before {
     opacity: 1;
     transform: scale(1) rotate(0);
@@ -219,10 +285,6 @@
   .nocturne-toggle:focus-visible {
     outline: 2px solid #ff376f;
     outline-offset: 3px;
-  }
-
-  .nocturne-toggle:disabled {
-    cursor: wait;
   }
 
   .nocturne-toggle__icon {
@@ -254,7 +316,8 @@
   }
 
   .nocturne-toggle:hover .nocturne-toggle__icon,
-  .nocturne-toggle:focus-visible .nocturne-toggle__icon {
+  .nocturne-toggle:focus-visible .nocturne-toggle__icon,
+  .nocturne-toggle[data-hover-lock="true"] .nocturne-toggle__icon {
     transform: scale(1.07) rotate(-3deg);
   }
 
@@ -280,7 +343,8 @@
   }
 
   :global(html[data-skin="nocturne"]) .nocturne-toggle:hover,
-  :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible {
+  :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible,
+  :global(html[data-skin="nocturne"]) .nocturne-toggle[data-hover-lock="true"] {
     border-color: #fff6cf;
     transform: translateY(-1px);
     box-shadow:
@@ -290,7 +354,8 @@
   }
 
   :global(html[data-skin="nocturne"]) .nocturne-toggle:hover .nocturne-toggle__icon,
-  :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible .nocturne-toggle__icon {
+  :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible .nocturne-toggle__icon,
+  :global(html[data-skin="nocturne"]) .nocturne-toggle[data-hover-lock="true"] .nocturne-toggle__icon {
     transform: translateY(-1px) scale(1.06);
   }
 

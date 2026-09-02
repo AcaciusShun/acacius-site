@@ -282,6 +282,42 @@ html.nocturne-transition--exit::view-transition-new(root) {
   animation: none;
 }
 
+html.nocturne-transition .nocturne-toggle {
+  view-transition-name: nocturne-toggle;
+}
+
+html.nocturne-transition .nocturne-toggle,
+html.nocturne-transition .nocturne-toggle::before,
+html.nocturne-transition .nocturne-toggle__icon {
+  transition: none;
+}
+
+html.nocturne-transition::view-transition {
+  pointer-events: none;
+}
+
+html.nocturne-transition::view-transition-group(nocturne-toggle) {
+  z-index: 3;
+  animation-duration: 240ms;
+  animation-timing-function: var(--ease-smooth);
+}
+
+html.nocturne-transition::view-transition-old(nocturne-toggle),
+html.nocturne-transition::view-transition-new(nocturne-toggle) {
+  mix-blend-mode: normal;
+  animation-duration: 240ms;
+  animation-timing-function: var(--ease-smooth);
+  animation-fill-mode: both;
+}
+
+html.nocturne-transition::view-transition-old(nocturne-toggle) {
+  animation-name: nocturne-toggle-out;
+}
+
+html.nocturne-transition::view-transition-new(nocturne-toggle) {
+  animation-name: nocturne-toggle-in;
+}
+
 @keyframes fade-out {
   from { opacity: 1; }
   to { opacity: 0; }
@@ -298,6 +334,28 @@ html.nocturne-transition--exit::view-transition-new(root) {
   }
   to {
     clip-path: circle(150vmax at var(--theme-x, 95%) var(--theme-y, 32px));
+  }
+}
+
+@keyframes nocturne-toggle-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes nocturne-toggle-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
