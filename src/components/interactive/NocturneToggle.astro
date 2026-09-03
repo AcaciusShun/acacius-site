@@ -143,14 +143,26 @@
       var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       var transitionMode = next ? "nocturne-transition--enter" : "nocturne-transition--exit";
       var rect = button.getBoundingClientRect();
+      var viewportWidth = Math.max(window.innerWidth, 1);
+      var viewportHeight = Math.max(window.innerHeight, 1);
+      var themeX = Math.min(Math.max(rect.left + rect.width / 2, 0), viewportWidth);
+      var themeY = Math.min(Math.max(rect.top + rect.height / 2, 0), viewportHeight);
+      var farthestX = Math.max(themeX, viewportWidth - themeX);
+      var farthestY = Math.max(themeY, viewportHeight - themeY);
+      var cornerRadius = Math.hypot(farthestX, farthestY);
+      var radiusGuard = Math.max(8, cornerRadius * 0.0125);
+      var radiusBasis = Math.hypot(viewportWidth, viewportHeight) / Math.SQRT2;
+      var themeRadius = ((cornerRadius + radiusGuard) / radiusBasis) * 100;
       transitionHitbox = {
         left: rect.left - 4,
         right: rect.right + 4,
         top: rect.top - 4,
         bottom: rect.bottom + 4
       };
-      root.style.setProperty("--theme-x", rect.left + rect.width / 2 + "px");
-      root.style.setProperty("--theme-y", rect.top + rect.height / 2 + "px");
+      // Percentages keep the circle pinned to the button when the compositor scales large viewports.
+      root.style.setProperty("--theme-x", ((themeX / viewportWidth) * 100).toFixed(4) + "%");
+      root.style.setProperty("--theme-y", ((themeY / viewportHeight) * 100).toFixed(4) + "%");
+      root.style.setProperty("--theme-radius", themeRadius.toFixed(4) + "%");
 
       var released = false;
 

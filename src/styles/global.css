@@ -274,7 +274,7 @@ html.nocturne-transition--enter::view-transition-new(root) {
 
 html.nocturne-transition--exit::view-transition-old(root) {
   z-index: 2;
-  animation: nocturne-spread 900ms cubic-bezier(0.32, 0.72, 0, 1) reverse both;
+  animation: nocturne-recede 700ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
 html.nocturne-transition--exit::view-transition-new(root) {
@@ -333,7 +333,16 @@ html.nocturne-transition::view-transition-new(nocturne-toggle) {
     clip-path: circle(0 at var(--theme-x, 95%) var(--theme-y, 32px));
   }
   to {
-    clip-path: circle(150vmax at var(--theme-x, 95%) var(--theme-y, 32px));
+    clip-path: circle(var(--theme-radius, 150vmax) at var(--theme-x, 95%) var(--theme-y, 32px));
+  }
+}
+
+@keyframes nocturne-recede {
+  from {
+    clip-path: circle(var(--theme-radius, 150vmax) at var(--theme-x, 95%) var(--theme-y, 32px));
+  }
+  to {
+    clip-path: circle(0 at var(--theme-x, 95%) var(--theme-y, 32px));
   }
 }
 
