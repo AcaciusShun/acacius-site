@@ -1,0 +1,374 @@
+---
+---
+
+<button
+  class="nocturne-toggle"
+  id="nocturne-toggle"
+  type="button"
+  aria-label="进入绯红夜曲"
+  aria-pressed="false"
+  title="Crimson Nocturne"
+>
+  <svg
+    class="nocturne-toggle__icon"
+    width="25"
+    height="25"
+    viewBox="0 0 32 32"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <g class="nocturne-toggle__mark nocturne-toggle__mark--devil" data-nocturne-mark="devil">
+      <path
+        class="nocturne-toggle__devil-body"
+        fill="currentColor"
+        d="M11.9 8.5C7.2 8.9 4.2 5.8 5.5 1.7c1.2 2.5 3.4 3.9 6.7 3.6l-.3 3.2Zm8.2 0c4.7.4 7.7-2.7 6.4-6.8-1.2 2.5-3.4 3.9-6.7 3.6l.3 3.2ZM5.4 11.7 2.3 10l2.6 6.2.5 3.1c.7 5.1 4.6 8.8 10.6 9.7 6-.9 9.9-4.6 10.6-9.7l.5-3.1 2.6-6.2-3.1 1.7C23.8 8.8 20.3 7.4 16 7.4S8.2 8.8 5.4 11.7Z"
+      />
+      <path
+        class="nocturne-toggle__devil-cutout"
+        fill="#fffaf3"
+        d="M8 14.8c2.6.2 4.9 1.1 6.5 2.6-2.4.6-4.6 1.8-6.1 3.5-.5-2.2-.6-4.3-.4-6.1Zm16 0c-2.6.2-4.9 1.1-6.5 2.6 2.4.6 4.6 1.8 6.1 3.5.5-2.2.6-4.3.4-6.1ZM8.8 22c4.5 1.9 9.9 1.9 14.4 0-1.3 3.4-3.8 5.3-7.2 5.3S10.1 25.4 8.8 22Z"
+      />
+      <path
+        class="nocturne-toggle__devil-teeth"
+        fill="currentColor"
+        d="m11.2 22.7 2 .5-1 2 2.8-1.7h2l2.8 1.7-1-2 2-.5-1 3.1-3.8-2-3.8 2-1-3.1Z"
+      />
+    </g>
+
+    <g
+      class="nocturne-toggle__mark nocturne-toggle__mark--angel"
+      data-nocturne-mark="angel"
+      display="none"
+      transform="matrix(1.06 0 0 1.06 -0.96 -0.96)"
+    >
+      <ellipse
+        class="nocturne-toggle__halo"
+        cx="16"
+        cy="5"
+        rx="6.5"
+        ry="2.25"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.1"
+      />
+      <path
+        class="nocturne-toggle__angel-wing"
+        fill="currentColor"
+        d="M14.4 27.8c-3 .6-6.1-.5-7.4-3 1.6.2 3-.3 3.9-1.3-3.7.1-6.4-2.1-6.9-5.1 1.9.7 3.8.6 5.4-.4-3.3-.5-5.6-2.8-6.3-5.7 2.7 1.5 5.4 1.8 7.6.9-2.9-1.3-5.4-3.6-6.5-6.6 3.3 2.6 6.7 4.4 9.2 5.6 1.9.9 2.5 3 1.7 5l-.9 9.4c0 .5.1.9.2 1.2Z"
+      />
+      <path
+        class="nocturne-toggle__angel-wing"
+        fill="currentColor"
+        d="M17.6 27.8c3 .6 6.1-.5 7.4-3-1.6.2-3-.3-3.9-1.3 3.7.1 6.4-2.1 6.9-5.1-1.9.7-3.8.6-5.4-.4 3.3-.5 5.6-2.8 6.3-5.7-2.7 1.5-5.4 1.8-7.6.9 2.9-1.3 5.4-3.6 6.5-6.6-3.3 2.6-6.7 4.4-9.2 5.6-1.9.9-2.5 3-1.7 5l.9 9.4c0 .5-.1.9-.2 1.2Z"
+      />
+    </g>
+  </svg>
+</button>
+
+<script is:inline>
+  (function () {
+    var button = document.getElementById("nocturne-toggle");
+    if (!button || button.dataset.init) return;
+    button.dataset.init = "true";
+
+    var root = document.documentElement;
+    var storageKey = "somlar-skin";
+    var transitioning = false;
+    var queuedToggle = false;
+    var transitionHitbox = null;
+    var devilMark = button.querySelector('[data-nocturne-mark="devil"]');
+    var angelMark = button.querySelector('[data-nocturne-mark="angel"]');
+
+    button.addEventListener("pointerleave", function () {
+      if (!transitioning) delete button.dataset.hoverLock;
+    });
+
+    function isNocturne() {
+      return root.dataset.skin === "nocturne";
+    }
+
+    function syncControls() {
+      var active = isNocturne();
+      button.setAttribute("aria-pressed", String(active));
+      button.setAttribute("aria-label", active ? "退出绯红夜曲" : "进入绯红夜曲");
+      button.title = active ? "Return to the standard theme" : "Enter Crimson Nocturne";
+      button.dataset.mark = active ? "angel" : "devil";
+      if (devilMark) {
+        if (active) devilMark.setAttribute("display", "none");
+        else devilMark.removeAttribute("display");
+      }
+      if (angelMark) {
+        if (active) angelMark.removeAttribute("display");
+        else angelMark.setAttribute("display", "none");
+      }
+
+      var standardToggle = document.getElementById("theme-toggle");
+      if (standardToggle) standardToggle.hidden = active;
+    }
+
+    function applySkin(next) {
+      if (next) {
+        root.dataset.skin = "nocturne";
+      } else {
+        delete root.dataset.skin;
+      }
+
+      try {
+        if (next) localStorage.setItem(storageKey, "nocturne");
+        else localStorage.removeItem(storageKey);
+      } catch (error) {
+        // The visual state still works when storage is unavailable.
+      }
+
+      syncControls();
+      window.dispatchEvent(new CustomEvent("somlar:skinchange", { detail: { skin: next ? "nocturne" : "standard" } }));
+    }
+
+    function queueToggle() {
+      queuedToggle = !queuedToggle;
+      if (queuedToggle) button.dataset.queued = "true";
+      else delete button.dataset.queued;
+    }
+
+    function beginTransition() {
+      if (button.matches(":hover")) button.dataset.hoverLock = "true";
+      transitioning = true;
+      button.dataset.transitioning = "true";
+      button.setAttribute("aria-busy", "true");
+
+      var next = !isNocturne();
+      var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var transitionMode = next ? "nocturne-transition--enter" : "nocturne-transition--exit";
+      var rect = button.getBoundingClientRect();
+      var viewportWidth = Math.max(window.innerWidth, 1);
+      var viewportHeight = Math.max(window.innerHeight, 1);
+      var themeX = Math.min(Math.max(rect.left + rect.width / 2, 0), viewportWidth);
+      var themeY = Math.min(Math.max(rect.top + rect.height / 2, 0), viewportHeight);
+      var farthestX = Math.max(themeX, viewportWidth - themeX);
+      var farthestY = Math.max(themeY, viewportHeight - themeY);
+      var cornerRadius = Math.hypot(farthestX, farthestY);
+      var radiusGuard = Math.max(8, cornerRadius * 0.0125);
+      var radiusBasis = Math.hypot(viewportWidth, viewportHeight) / Math.SQRT2;
+      var themeRadius = ((cornerRadius + radiusGuard) / radiusBasis) * 100;
+      transitionHitbox = {
+        left: rect.left - 4,
+        right: rect.right + 4,
+        top: rect.top - 4,
+        bottom: rect.bottom + 4
+      };
+      // Percentages keep the circle pinned to the button when the compositor scales large viewports.
+      root.style.setProperty("--theme-x", ((themeX / viewportWidth) * 100).toFixed(4) + "%");
+      root.style.setProperty("--theme-y", ((themeY / viewportHeight) * 100).toFixed(4) + "%");
+      root.style.setProperty("--theme-radius", themeRadius.toFixed(4) + "%");
+
+      var released = false;
+
+      function release() {
+        if (released) return;
+        released = true;
+        root.classList.remove(
+          "nocturne-transition",
+          "nocturne-transition--enter",
+          "nocturne-transition--exit"
+        );
+        delete button.dataset.transitioning;
+        button.removeAttribute("aria-busy");
+        transitioning = false;
+        transitionHitbox = null;
+
+        var shouldToggleAgain = queuedToggle;
+        queuedToggle = false;
+        delete button.dataset.queued;
+
+        requestAnimationFrame(function () {
+          if (shouldToggleAgain) {
+            beginTransition();
+            return;
+          }
+
+          setTimeout(function () {
+            if (!button.matches(":hover")) delete button.dataset.hoverLock;
+          }, 50);
+        });
+      }
+
+      if (!reduceMotion && document.startViewTransition) {
+        root.classList.add("nocturne-transition", transitionMode);
+        var transition = document.startViewTransition(function () {
+          applySkin(next);
+        });
+        transition.finished.then(release, release);
+      } else {
+        applySkin(next);
+        release();
+      }
+    }
+
+    button.addEventListener("click", function () {
+      if (transitioning) {
+        queueToggle();
+        return;
+      }
+
+      beginTransition();
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!transitioning || !transitionHitbox || event.target === button || button.contains(event.target)) return;
+
+      if (
+        event.clientX >= transitionHitbox.left &&
+        event.clientX <= transitionHitbox.right &&
+        event.clientY >= transitionHitbox.top &&
+        event.clientY <= transitionHitbox.bottom
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        queueToggle();
+      }
+    }, true);
+
+    syncControls();
+  })();
+</script>
+
+<style>
+  .nocturne-toggle {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    box-sizing: border-box;
+    padding: 0;
+    border: 1px solid rgba(229, 28, 70, 0.68);
+    border-radius: 12px;
+    color: #e51c46;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.9), transparent 46%),
+      #fff8f4;
+    box-shadow:
+      0 0 0 3px rgba(229, 28, 70, 0.08),
+      3px 3px 0 rgba(128, 18, 52, 0.22);
+    cursor: pointer;
+    isolation: isolate;
+    overflow: visible;
+    transition:
+      border-color var(--duration-fast) var(--ease-smooth),
+      background-color var(--duration-fast) var(--ease-smooth),
+      box-shadow var(--duration-fast) var(--ease-smooth);
+  }
+
+  .nocturne-toggle::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    z-index: -1;
+    border-radius: inherit;
+    background: rgba(229, 28, 70, 0.08);
+    opacity: 0.72;
+    transform: scale(0.72) rotate(-8deg);
+    transition:
+      opacity var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-normal) var(--ease-bounce);
+  }
+
+  .nocturne-toggle:hover,
+  .nocturne-toggle:focus-visible,
+  .nocturne-toggle[data-hover-lock="true"] {
+    border-color: #ff315f;
+    box-shadow:
+      0 0 0 4px rgba(229, 28, 70, 0.12),
+      3px 3px 0 rgba(128, 18, 52, 0.25);
+  }
+
+  .nocturne-toggle:hover::before,
+  .nocturne-toggle:focus-visible::before,
+  .nocturne-toggle[data-hover-lock="true"]::before,
+  .nocturne-toggle[aria-pressed="true"]::before {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+
+  .nocturne-toggle:focus-visible {
+    outline: 2px solid #ff376f;
+    outline-offset: 3px;
+  }
+
+  .nocturne-toggle__icon {
+    display: block;
+    overflow: visible;
+    transform-origin: 50% 50%;
+    transition:
+      transform var(--duration-normal) var(--ease-bounce),
+      filter var(--duration-normal) var(--ease-smooth);
+  }
+
+  .nocturne-toggle__devil-body,
+  .nocturne-toggle__devil-teeth {
+    fill: currentColor;
+  }
+
+  .nocturne-toggle__devil-cutout {
+    fill: #fffaf3;
+  }
+
+  .nocturne-toggle__mark--devil {
+    filter: drop-shadow(0 1px 0 rgba(105, 12, 42, 0.2));
+    transform-origin: 50% 55%;
+  }
+
+  .nocturne-toggle__mark--angel {
+    filter: none;
+    transform-origin: 50% 52%;
+  }
+
+  .nocturne-toggle:hover .nocturne-toggle__icon,
+  .nocturne-toggle:focus-visible .nocturne-toggle__icon,
+  .nocturne-toggle[data-hover-lock="true"] .nocturne-toggle__icon {
+    transform: scale(1.06);
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-toggle {
+    color: #fff1b8;
+    border-color: rgba(255, 241, 184, 0.86);
+    border-radius: 12px;
+    background:
+      radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.18), transparent 44%),
+      rgba(22, 24, 43, 0.96);
+    box-shadow:
+      0 0 0 3px rgba(255, 241, 184, 0.1),
+      0 0 18px rgba(255, 224, 128, 0.2),
+      3px 3px 0 rgba(88, 21, 47, 0.48);
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-toggle::before {
+    background: rgba(255, 241, 184, 0.12);
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible {
+    outline-color: #fff1b8;
+  }
+
+  :global(html[data-skin="nocturne"]) .nocturne-toggle:hover,
+  :global(html[data-skin="nocturne"]) .nocturne-toggle:focus-visible,
+  :global(html[data-skin="nocturne"]) .nocturne-toggle[data-hover-lock="true"] {
+    border-color: #fff6cf;
+    box-shadow:
+      0 0 0 4px rgba(255, 241, 184, 0.13),
+      0 0 22px rgba(255, 224, 128, 0.27),
+      3px 3px 0 rgba(88, 21, 47, 0.52);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nocturne-toggle,
+    .nocturne-toggle::before,
+    .nocturne-toggle__icon {
+      transition: none;
+    }
+  }
+</style>

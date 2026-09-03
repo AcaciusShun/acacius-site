@@ -16,11 +16,16 @@
   --color-accent: #8b6243;
   --color-accent-hover: #a0734e;
   --color-accent-subtle: rgba(139, 98, 67, 0.08);
-  --color-code-bg: rgba(139, 98, 67, 0.1);
-  --color-code-text: #6b4423;
-  --color-code-block-bg: #f8f6f1;
-  --color-code-block-border: rgba(101, 83, 65, 0.18);
-  --color-code-toolbar: rgba(248, 246, 241, 0.88);
+  --color-code-bg: rgba(111, 78, 52, 0.1);
+  --color-code-text: #5f3d22;
+  --color-code-inline-border: rgba(95, 61, 34, 0.18);
+  --color-code-block-bg: #f0f2f4;
+  --color-code-block-border: rgba(47, 53, 60, 0.28);
+  --color-code-toolbar: #e3e7ea;
+  --color-code-block-text: #20242a;
+  --color-code-caption: #4d5866;
+  --color-code-selection: rgba(139, 98, 67, 0.24);
+  --color-code-accent: #8b6243;
   --color-blockquote-bg: rgba(139, 98, 67, 0.06);
   --color-rule: rgba(101, 83, 65, 0.15);
   --color-rule-strong: rgba(101, 83, 65, 0.3);
@@ -90,16 +95,61 @@
   --color-accent: #c4956a;
   --color-accent-hover: #d4a57a;
   --color-accent-subtle: rgba(196, 149, 106, 0.12);
-  --color-code-bg: rgba(196, 149, 106, 0.15);
-  --color-code-text: #d4a57a;
-  --color-code-block-bg: #17191d;
-  --color-code-block-border: rgba(196, 181, 165, 0.18);
-  --color-code-toolbar: rgba(23, 25, 29, 0.88);
+  --color-code-bg: rgba(196, 149, 106, 0.16);
+  --color-code-text: #e0ad80;
+  --color-code-inline-border: rgba(224, 173, 128, 0.24);
+  --color-code-block-bg: #101318;
+  --color-code-block-border: rgba(194, 204, 219, 0.24);
+  --color-code-toolbar: #181d25;
+  --color-code-block-text: #eef2f8;
+  --color-code-caption: #aab4c2;
+  --color-code-selection: rgba(196, 149, 106, 0.3);
+  --color-code-accent: #c4956a;
   --color-blockquote-bg: rgba(196, 149, 106, 0.08);
   --color-rule: rgba(168, 148, 128, 0.15);
   --color-rule-strong: rgba(168, 148, 128, 0.28);
   --color-shadow: rgba(0, 0, 0, 0.3);
   --color-shadow-hover: rgba(0, 0, 0, 0.45);
+}
+
+/* Second visual skin — "绯红夜曲 / Crimson Nocturne" */
+html[data-skin="nocturne"] {
+  color-scheme: dark;
+  --color-bg: #090b18;
+  --color-bg-warm: #0f1122;
+  --color-bg-elevated: #171a30;
+  --color-surface: rgba(19, 21, 40, 0.94);
+  --color-ink: #f2eedf;
+  --color-ink-secondary: #b8b5c8;
+  --color-ink-tertiary: #7d7b91;
+  --color-accent: #ff376f;
+  --color-accent-hover: #ff6692;
+  --color-accent-subtle: rgba(255, 55, 111, 0.13);
+  --color-code-bg: rgba(255, 55, 111, 0.16);
+  --color-code-text: #ffb3c8;
+  --color-code-inline-border: rgba(255, 91, 139, 0.32);
+  --color-code-block-bg: #101426;
+  --color-code-block-border: rgba(255, 91, 139, 0.5);
+  --color-code-toolbar: #191d35;
+  --color-code-block-text: #f8f5ed;
+  --color-code-caption: #cbc7d8;
+  --color-code-selection: rgba(255, 55, 111, 0.34);
+  --color-code-accent: #ff376f;
+  --color-blockquote-bg: rgba(255, 55, 111, 0.08);
+  --color-rule: rgba(197, 193, 217, 0.13);
+  --color-rule-strong: rgba(255, 55, 111, 0.4);
+  --color-shadow: rgba(0, 0, 0, 0.36);
+  --color-shadow-hover: rgba(0, 0, 0, 0.56);
+  --color-nocturne-violet: #2b2d4a;
+  --color-nocturne-wine: #58152f;
+  --font-display: "Inter", "Noto Sans SC", system-ui, sans-serif;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-full: 8px;
+  --shadow-sm: 3px 3px 0 rgba(88, 21, 47, 0.36);
+  --shadow-md: 5px 5px 0 rgba(88, 21, 47, 0.42), 0 16px 38px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 8px 8px 0 rgba(88, 21, 47, 0.48), 0 22px 54px rgba(0, 0, 0, 0.32);
 }
 
 /* ─── Base Reset ─── */
@@ -126,6 +176,29 @@ body {
   color: var(--color-ink);
   background-color: var(--color-bg);
   overflow-x: hidden;
+}
+
+html[data-skin="nocturne"] body {
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(circle at 83% 7%, rgba(255, 55, 111, 0.12), transparent 24rem),
+    radial-gradient(circle at 12% 58%, rgba(94, 65, 140, 0.1), transparent 30rem),
+    repeating-linear-gradient(122deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 14px);
+}
+
+html[data-skin="nocturne"] body::before {
+  content: "";
+  position: fixed;
+  inset: 64px 0 auto;
+  z-index: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  opacity: 0.5;
+}
+
+html[data-skin="nocturne"] #theme-toggle {
+  display: none;
 }
 
 /* Only animate theme changes triggered by user toggle, not on page load */
@@ -189,6 +262,62 @@ img {
   animation-name: fade-in;
 }
 
+html.nocturne-transition--enter::view-transition-old(root) {
+  z-index: 1;
+  animation: none;
+}
+
+html.nocturne-transition--enter::view-transition-new(root) {
+  z-index: 2;
+  animation: nocturne-spread 900ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+html.nocturne-transition--exit::view-transition-old(root) {
+  z-index: 2;
+  animation: nocturne-recede 700ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+html.nocturne-transition--exit::view-transition-new(root) {
+  z-index: 1;
+  animation: none;
+}
+
+html.nocturne-transition .nocturne-toggle {
+  view-transition-name: nocturne-toggle;
+}
+
+html.nocturne-transition .nocturne-toggle,
+html.nocturne-transition .nocturne-toggle::before,
+html.nocturne-transition .nocturne-toggle__icon {
+  transition: none;
+}
+
+html.nocturne-transition::view-transition {
+  pointer-events: none;
+}
+
+html.nocturne-transition::view-transition-group(nocturne-toggle) {
+  z-index: 3;
+  animation-duration: 240ms;
+  animation-timing-function: var(--ease-smooth);
+}
+
+html.nocturne-transition::view-transition-old(nocturne-toggle),
+html.nocturne-transition::view-transition-new(nocturne-toggle) {
+  mix-blend-mode: normal;
+  animation-duration: 240ms;
+  animation-timing-function: var(--ease-smooth);
+  animation-fill-mode: both;
+}
+
+html.nocturne-transition::view-transition-old(nocturne-toggle) {
+  animation-name: nocturne-toggle-out;
+}
+
+html.nocturne-transition::view-transition-new(nocturne-toggle) {
+  animation-name: nocturne-toggle-in;
+}
+
 @keyframes fade-out {
   from { opacity: 1; }
   to { opacity: 0; }
@@ -197,6 +326,46 @@ img {
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes nocturne-spread {
+  from {
+    clip-path: circle(0 at var(--theme-x, 95%) var(--theme-y, 32px));
+  }
+  to {
+    clip-path: circle(var(--theme-radius, 150vmax) at var(--theme-x, 95%) var(--theme-y, 32px));
+  }
+}
+
+@keyframes nocturne-recede {
+  from {
+    clip-path: circle(var(--theme-radius, 150vmax) at var(--theme-x, 95%) var(--theme-y, 32px));
+  }
+  to {
+    clip-path: circle(0 at var(--theme-x, 95%) var(--theme-y, 32px));
+  }
+}
+
+@keyframes nocturne-toggle-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes nocturne-toggle-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ─── Utility Classes ─── */
@@ -246,3 +415,31 @@ img {
 .animate-stagger-in > *:nth-child(6) { animation-delay: 300ms; }
 .animate-stagger-in > *:nth-child(7) { animation-delay: 360ms; }
 .animate-stagger-in > *:nth-child(8) { animation-delay: 420ms; }
+
+@media (max-width: 640px) {
+  html[data-skin="nocturne"] body {
+    background-image:
+      radial-gradient(circle at 82% 4%, rgba(255, 55, 111, 0.1), transparent 18rem),
+      linear-gradient(var(--color-bg), var(--color-bg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

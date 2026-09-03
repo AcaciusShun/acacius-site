@@ -172,6 +172,25 @@ const analyticsEnabled = Boolean(siteConfig.analytics.measurementId);
     background: var(--color-accent-hover);
   }
 
+  :global(html[data-skin="nocturne"]) .analytics-consent {
+    border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+    background:
+      linear-gradient(135deg, rgba(255, 55, 111, 0.08), transparent 45%),
+      var(--color-surface);
+    box-shadow: var(--shadow-lg);
+    clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  :global(html[data-skin="nocturne"]) .analytics-consent h2 {
+    font-family: var(--font-body);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+  }
+
+  :global(html[data-skin="nocturne"]) .analytics-consent__button {
+    clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+  }
+
   @media (max-width: 560px) {
     .analytics-consent {
       right: var(--space-3);

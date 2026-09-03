@@ -154,7 +154,10 @@ const { tag, posts } = Astro.props;
     color: var(--color-ink-tertiary);
     opacity: 0;
     transform: translateX(-8px);
-    transition: all var(--duration-fast) var(--ease-smooth);
+    transition:
+      color var(--duration-fast) var(--ease-smooth),
+      opacity var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-fast) var(--ease-smooth);
   }
 
   .post-item__link:hover .post-item__arrow {

@@ -156,7 +156,11 @@ const tags = getAllTags(posts);
     color: var(--color-ink-secondary);
     font-size: var(--text-xs);
     letter-spacing: 0.03em;
-    transition: all var(--duration-fast) var(--ease-smooth);
+    transition:
+      color var(--duration-fast) var(--ease-smooth),
+      border-color var(--duration-fast) var(--ease-smooth),
+      background-color var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-fast) var(--ease-smooth);
   }
 
   .tags__item:hover {
@@ -258,7 +262,10 @@ const tags = getAllTags(posts);
     color: var(--color-ink-tertiary);
     opacity: 0;
     transform: translateX(-8px);
-    transition: all var(--duration-fast) var(--ease-smooth);
+    transition:
+      color var(--duration-fast) var(--ease-smooth),
+      opacity var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-fast) var(--ease-smooth);
   }
 
   .post-item__link:hover .post-item__arrow {
@@ -312,6 +319,159 @@ const tags = getAllTags(posts);
     border-radius: var(--radius-lg);
   }
 
+  /* ─── Crimson Nocturne ─── */
+
+  :global(html[data-skin="nocturne"]) .blog__header {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-content: center;
+    min-height: 420px;
+    padding: clamp(36px, 7vw, 82px);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 48%, transparent);
+    background-image:
+      linear-gradient(90deg, rgba(8, 9, 21, 0.98) 0%, rgba(8, 9, 21, 0.9) 43%, rgba(8, 9, 21, 0.18) 76%),
+      url("/images/themes/crimson-nocturne/blog-hero.webp");
+    background-position: center;
+    background-size: cover;
+    box-shadow: var(--shadow-lg);
+    clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  }
+
+  :global(html[data-skin="nocturne"]) .blog__header::before {
+    content: "INK / EMBER / LOG";
+    position: absolute;
+    right: clamp(16px, 3vw, 34px);
+    bottom: clamp(14px, 2vw, 24px);
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    color: rgba(242, 238, 223, 0.55);
+  }
+
+  :global(html[data-skin="nocturne"]) .blog__header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 18%;
+    bottom: 18%;
+    width: 4px;
+    background: linear-gradient(transparent, var(--color-accent), transparent);
+    box-shadow: 8px 0 24px rgba(255, 55, 111, 0.4);
+  }
+
+  :global(html[data-skin="nocturne"]) .blog__eyebrow,
+  :global(html[data-skin="nocturne"]) .blog__title,
+  :global(html[data-skin="nocturne"]) .blog__desc {
+    position: relative;
+    z-index: 1;
+    max-width: 52%;
+  }
+
+  :global(html[data-skin="nocturne"]) .blog__eyebrow {
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+  }
+
+  :global(html[data-skin="nocturne"]) .blog__title {
+    font-size: clamp(3.4rem, 8vw, 6.5rem);
+    font-weight: 900;
+    letter-spacing: -0.075em;
+    line-height: 0.9;
+    text-transform: uppercase;
+    text-shadow: 5px 5px 0 var(--color-nocturne-wine);
+    transform: skewX(-3deg);
+  }
+
+  :global(html[data-skin="nocturne"]) .blog__desc {
+    max-width: 34ch;
+    font-size: var(--text-base);
+  }
+
+  :global(html[data-skin="nocturne"]) .tags {
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-rule));
+    background: rgba(15, 17, 34, 0.78);
+    box-shadow: 4px 4px 0 rgba(88, 21, 47, 0.28);
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  }
+
+  :global(html[data-skin="nocturne"]) .tags__item {
+    font-family: var(--font-mono);
+    border-color: color-mix(in srgb, var(--color-accent) 24%, var(--color-rule));
+    clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+  }
+
+  :global(html[data-skin="nocturne"]) .tags__item:hover {
+    color: var(--color-ink);
+    border-color: var(--color-accent);
+    background: var(--color-accent-subtle);
+    transform: translateY(-2px) rotate(-0.5deg);
+  }
+
+  :global(html[data-skin="nocturne"]) .post-list {
+    position: relative;
+    padding-left: var(--space-4);
+  }
+
+  :global(html[data-skin="nocturne"]) .post-list::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(var(--color-accent), rgba(255, 55, 111, 0.08));
+  }
+
+  :global(html[data-skin="nocturne"]) .post-item {
+    border-bottom-color: color-mix(in srgb, var(--color-accent) 15%, var(--color-rule));
+  }
+
+  :global(html[data-skin="nocturne"]) .post-item__link {
+    position: relative;
+    padding-right: var(--space-4);
+    border-left: 0 solid transparent;
+    background: linear-gradient(90deg, transparent, transparent);
+    transition:
+      padding-left var(--duration-fast) var(--ease-smooth),
+      background-color var(--duration-fast) var(--ease-smooth);
+  }
+
+  :global(html[data-skin="nocturne"]) .post-item__link::before {
+    content: "";
+    position: absolute;
+    left: calc(-1 * var(--space-4) - 3px);
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border: 2px solid var(--color-accent);
+    background: var(--color-bg);
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  :global(html[data-skin="nocturne"]) .post-item__link:hover {
+    padding-left: var(--space-4);
+    background: linear-gradient(90deg, rgba(255, 55, 111, 0.08), transparent 72%);
+  }
+
+  :global(html[data-skin="nocturne"]) .post-item__title {
+    font-family: var(--font-body);
+    font-weight: 750;
+    letter-spacing: -0.035em;
+  }
+
+  :global(html[data-skin="nocturne"]) .post-item__arrow {
+    color: var(--color-accent);
+    text-shadow: 0 0 10px rgba(255, 55, 111, 0.45);
+  }
+
+  :global(html[data-skin="nocturne"]) .pager {
+    border-top-color: color-mix(in srgb, var(--color-accent) 25%, var(--color-rule));
+  }
+
   /* ─── Responsive ─── */
 
   @media (max-width: 640px) {
@@ -325,6 +485,33 @@ const tags = getAllTags(posts);
 
     .post-item__arrow {
       display: none;
+    }
+
+    :global(html[data-skin="nocturne"]) .blog__header {
+      min-height: 350px;
+      padding: var(--space-8) var(--space-6);
+      background-image:
+        linear-gradient(90deg, rgba(8, 9, 21, 0.98) 0%, rgba(8, 9, 21, 0.88) 56%, rgba(8, 9, 21, 0.36) 100%),
+        url("/images/themes/crimson-nocturne/blog-hero.webp");
+      background-position: 60% center;
+    }
+
+    :global(html[data-skin="nocturne"]) .blog__eyebrow,
+    :global(html[data-skin="nocturne"]) .blog__title,
+    :global(html[data-skin="nocturne"]) .blog__desc {
+      max-width: 78%;
+    }
+
+    :global(html[data-skin="nocturne"]) .blog__title {
+      font-size: clamp(2.8rem, 15vw, 4.25rem);
+    }
+
+    :global(html[data-skin="nocturne"]) .blog__desc {
+      font-size: var(--text-sm);
+    }
+
+    :global(html[data-skin="nocturne"]) .tags {
+      clip-path: none;
     }
   }
 </style>

@@ -476,6 +476,180 @@ const shelfLabel: Record<string, string> = {
     font-style: italic;
   }
 
+  /* ─── Crimson Nocturne ─── */
+
+  :global(html[data-skin="nocturne"]) .hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-content: center;
+    min-height: clamp(470px, 62vw, 660px);
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-12);
+    padding-top: clamp(70px, 9vw, 112px);
+    padding-bottom: clamp(70px, 9vw, 112px);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 52%, transparent);
+    background-image:
+      linear-gradient(90deg, rgba(7, 8, 20, 0.98) 0%, rgba(7, 8, 20, 0.9) 35%, rgba(7, 8, 20, 0.2) 68%, rgba(7, 8, 20, 0.02) 100%),
+      url("/images/themes/crimson-nocturne/home-hero.webp");
+    background-position: center;
+    background-size: cover;
+    box-shadow: var(--shadow-lg);
+    clip-path: polygon(0 0, calc(100% - 34px) 0, 100% 34px, 100% calc(100% - 22px), calc(100% - 22px) 100%, 24px 100%, 0 calc(100% - 24px));
+  }
+
+  :global(html[data-skin="nocturne"]) .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(125deg, transparent 60%, rgba(255, 55, 111, 0.09)),
+      repeating-linear-gradient(0deg, rgba(242, 238, 223, 0.025) 0 1px, transparent 1px 5px);
+    mix-blend-mode: screen;
+  }
+
+  :global(html[data-skin="nocturne"]) .hero::after {
+    content: "MIDNIGHT FORM / 02";
+    position: absolute;
+    right: clamp(16px, 3vw, 38px);
+    bottom: clamp(14px, 2vw, 24px);
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    color: rgba(242, 238, 223, 0.55);
+  }
+
+  :global(html[data-skin="nocturne"]) .hero__eyebrow {
+    position: relative;
+    z-index: 1;
+    width: fit-content;
+    margin-bottom: var(--space-4);
+    padding: 3px 10px 3px 17px;
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+    background: rgba(255, 55, 111, 0.1);
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+
+  :global(html[data-skin="nocturne"]) .hero__eyebrow::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  :global(html[data-skin="nocturne"]) .hero__title {
+    position: relative;
+    z-index: 1;
+    max-width: 8.5ch;
+    font-size: clamp(3.15rem, 7.5vw, 6rem);
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -0.07em;
+    text-transform: uppercase;
+    text-shadow: 5px 5px 0 var(--color-nocturne-wine), 9px 9px 0 rgba(9, 11, 24, 0.8);
+    transform: skewX(-3deg);
+  }
+
+  :global(html[data-skin="nocturne"]) .hero__subtitle {
+    position: relative;
+    z-index: 1;
+    max-width: 35ch;
+    color: var(--color-ink-secondary);
+  }
+
+  :global(html[data-skin="nocturne"]) .sections__grid {
+    gap: var(--space-5, 1.25rem);
+  }
+
+  :global(html[data-skin="nocturne"]) .section-card {
+    overflow: hidden;
+    border-color: color-mix(in srgb, var(--color-accent) 22%, var(--color-rule));
+    background:
+      linear-gradient(135deg, rgba(255, 55, 111, 0.045), transparent 42%),
+      var(--color-bg-elevated);
+    box-shadow: var(--shadow-md);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  :global(html[data-skin="nocturne"]) .section-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 54px;
+    height: 54px;
+    pointer-events: none;
+    background: linear-gradient(135deg, transparent 47%, rgba(255, 55, 111, 0.38) 48% 52%, rgba(88, 21, 47, 0.65) 53%);
+    clip-path: polygon(100% 0, 100% 100%, 0 0);
+  }
+
+  :global(html[data-skin="nocturne"]) .section-card:hover {
+    transform: translate(-2px, -4px);
+    border-color: color-mix(in srgb, var(--color-accent) 58%, transparent);
+    box-shadow: var(--shadow-lg);
+  }
+
+  :global(html[data-skin="nocturne"]) .section-card--wide {
+    border-left: 3px solid var(--color-accent);
+  }
+
+  :global(html[data-skin="nocturne"]) .section-card__index {
+    color: var(--color-accent);
+  }
+
+  :global(html[data-skin="nocturne"]) .section-card__title,
+  :global(html[data-skin="nocturne"]) .lately__title {
+    font-weight: 850;
+    letter-spacing: -0.055em;
+    text-transform: uppercase;
+  }
+
+  :global(html[data-skin="nocturne"]) .section-card__item {
+    border-image: linear-gradient(90deg, var(--color-rule), transparent) 1;
+  }
+
+  :global(html[data-skin="nocturne"]) .section-card__cta,
+  :global(html[data-skin="nocturne"]) .lately__cta {
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  :global(html[data-skin="nocturne"]) .lately__eyebrow {
+    color: var(--color-accent);
+  }
+
+  :global(html[data-skin="nocturne"]) .lately__cover {
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
+    background: var(--color-bg-elevated);
+    box-shadow: 3px 3px 0 rgba(88, 21, 47, 0.42);
+    clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
+  }
+
+  :global(html[data-skin="nocturne"]) .lately__item:hover .lately__cover {
+    transform: translate(-1px, -5px) rotate(-0.4deg);
+  }
+
+  :global(html[data-skin="nocturne"]) .lately__item-title {
+    font-family: var(--font-body);
+    font-weight: 650;
+  }
+
+  :global(html[data-skin="nocturne"]) .colophon__rule {
+    width: 120px;
+    height: 5px;
+    background: repeating-linear-gradient(115deg, var(--color-accent) 0 12px, transparent 12px 18px);
+    clip-path: polygon(0 50%, 8px 0, 17px 50%, 28px 0, 38px 50%, 48px 0, 100% 50%, 48px 100%, 38px 50%, 28px 100%, 17px 50%, 8px 100%);
+  }
+
   /* ─── Responsive ─── */
 
   @media (max-width: 768px) {
@@ -494,6 +668,16 @@ const shelfLabel: Record<string, string> = {
 
     .lately__row {
       grid-template-columns: repeat(3, 1fr);
+    }
+
+    :global(html[data-skin="nocturne"]) .hero {
+      min-height: 530px;
+      margin-top: var(--space-4);
+      margin-bottom: var(--space-8);
+      background-image:
+        linear-gradient(90deg, rgba(7, 8, 20, 0.98) 0%, rgba(7, 8, 20, 0.86) 46%, rgba(7, 8, 20, 0.3) 100%),
+        url("/images/themes/crimson-nocturne/home-hero.webp");
+      background-position: 58% center;
     }
   }
 
@@ -530,6 +714,27 @@ const shelfLabel: Record<string, string> = {
 
     .sections {
       padding-bottom: var(--space-8);
+    }
+
+    :global(html[data-skin="nocturne"]) .hero {
+      min-height: 470px;
+      padding: var(--space-12) var(--space-6);
+      background-image:
+        linear-gradient(90deg, rgba(7, 8, 20, 0.99) 0%, rgba(7, 8, 20, 0.88) 54%, rgba(7, 8, 20, 0.4) 100%),
+        url("/images/themes/crimson-nocturne/home-hero.webp");
+      background-position: 61% center;
+      clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px));
+    }
+
+    :global(html[data-skin="nocturne"]) .hero__title {
+      max-width: 7.5ch;
+      font-size: clamp(2.7rem, 14vw, 4rem);
+      text-shadow: 4px 4px 0 var(--color-nocturne-wine);
+    }
+
+    :global(html[data-skin="nocturne"]) .hero__subtitle {
+      max-width: 26ch;
+      font-size: var(--text-sm);
     }
   }
 </style>

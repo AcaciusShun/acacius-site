@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from "@/lib/config";
 import ThemeToggle from "@/components/interactive/ThemeToggle.astro";
+import NocturneToggle from "@/components/interactive/NocturneToggle.astro";
 import SearchDialog from "@/components/interactive/SearchDialog.astro";
 ---
 
@@ -24,6 +25,7 @@ import SearchDialog from "@/components/interactive/SearchDialog.astro";
     <div class="header__actions">
       <SearchDialog />
       <ThemeToggle />
+      <NocturneToggle />
       <button
         class="header__burger"
         id="nav-toggle"
@@ -94,6 +96,38 @@ import SearchDialog from "@/components/interactive/SearchDialog.astro";
     color: var(--color-accent);
   }
 
+  :global(html[data-skin="nocturne"]) .header {
+    background:
+      linear-gradient(90deg, rgba(9, 11, 24, 0.98), rgba(16, 16, 34, 0.88)),
+      var(--color-bg);
+    border-bottom-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    box-shadow: 0 5px 0 rgba(72, 16, 47, 0.35);
+  }
+
+  :global(html[data-skin="nocturne"]) .header__brand {
+    position: relative;
+    font-family: var(--font-body);
+    font-size: var(--text-xl);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    text-shadow: 2px 2px 0 rgba(255, 55, 111, 0.38);
+    transform: skewX(-4deg);
+  }
+
+  :global(html[data-skin="nocturne"]) .header__brand::after {
+    content: "N° 02";
+    display: inline-block;
+    margin-left: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--color-accent);
+    transform: skewX(4deg) translateY(-1px);
+  }
+
   /* ─── Desktop Nav ─── */
 
   .header__nav {
@@ -131,6 +165,33 @@ import SearchDialog from "@/components/interactive/SearchDialog.astro";
   .header__link:hover::after,
   .header__link--active::after {
     width: 100%;
+  }
+
+  :global(html[data-skin="nocturne"]) .header__nav {
+    gap: var(--space-2);
+  }
+
+  :global(html[data-skin="nocturne"]) .header__link {
+    padding: 6px 11px;
+    border: 1px solid transparent;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+
+  :global(html[data-skin="nocturne"]) .header__link::after {
+    left: 11px;
+    bottom: 3px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-accent), transparent);
+  }
+
+  :global(html[data-skin="nocturne"]) .header__link:hover,
+  :global(html[data-skin="nocturne"]) .header__link--active {
+    color: var(--color-ink);
+    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    background: linear-gradient(110deg, rgba(255, 55, 111, 0.15), rgba(83, 43, 102, 0.08));
   }
 
   /* ─── Actions (theme toggle + burger) ─── */
@@ -216,6 +277,19 @@ import SearchDialog from "@/components/interactive/SearchDialog.astro";
 
     .header__burger {
       display: flex;
+    }
+
+    :global(html[data-skin="nocturne"]) .header__nav {
+      gap: 0;
+      background: rgba(9, 11, 24, 0.97);
+      border-bottom-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    }
+
+    :global(html[data-skin="nocturne"]) .header__link {
+      padding: var(--space-3) var(--space-2);
+      border: 0;
+      border-bottom: 1px solid var(--color-rule);
+      clip-path: none;
     }
   }
 </style>

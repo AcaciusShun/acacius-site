@@ -269,6 +269,149 @@ const course = projects.filter((p) => p.category === "course");
     height: 14px;
   }
 
+  /* ─── Crimson Nocturne ─── */
+
+  :global(html[data-skin="nocturne"]) .projects__header {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-content: center;
+    min-height: 420px;
+    padding: clamp(36px, 7vw, 82px);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 48%, transparent);
+    background-image:
+      linear-gradient(90deg, rgba(8, 9, 21, 0.98) 0%, rgba(8, 9, 21, 0.9) 43%, rgba(8, 9, 21, 0.18) 76%),
+      url("/images/themes/crimson-nocturne/projects-hero.webp");
+    background-position: center;
+    background-size: cover;
+    box-shadow: var(--shadow-lg);
+    clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  }
+
+  :global(html[data-skin="nocturne"]) .projects__header::before {
+    content: "BUILT / NOT SUMMONED";
+    position: absolute;
+    right: clamp(16px, 3vw, 34px);
+    bottom: clamp(14px, 2vw, 24px);
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    color: rgba(242, 238, 223, 0.55);
+  }
+
+  :global(html[data-skin="nocturne"]) .projects__header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 18%;
+    bottom: 18%;
+    width: 4px;
+    background: linear-gradient(transparent, var(--color-accent), transparent);
+    box-shadow: 8px 0 24px rgba(255, 55, 111, 0.4);
+  }
+
+  :global(html[data-skin="nocturne"]) .projects__eyebrow,
+  :global(html[data-skin="nocturne"]) .projects__title,
+  :global(html[data-skin="nocturne"]) .projects__desc {
+    position: relative;
+    z-index: 1;
+    max-width: 52%;
+  }
+
+  :global(html[data-skin="nocturne"]) .projects__eyebrow {
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+  }
+
+  :global(html[data-skin="nocturne"]) .projects__title {
+    font-size: clamp(3.4rem, 8vw, 6.5rem);
+    font-weight: 900;
+    letter-spacing: -0.075em;
+    line-height: 0.9;
+    text-transform: uppercase;
+    text-shadow: 5px 5px 0 var(--color-nocturne-wine);
+    transform: skewX(-3deg);
+  }
+
+  :global(html[data-skin="nocturne"]) .projects__desc {
+    max-width: 34ch;
+    font-size: var(--text-base);
+  }
+
+  :global(html[data-skin="nocturne"]) .projects__section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    font-family: var(--font-body);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+
+  :global(html[data-skin="nocturne"]) .projects__section-title::after {
+    content: "";
+    flex: 1;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-accent), transparent);
+    clip-path: polygon(0 50%, 8px 0, 18px 50%, 28px 0, 100% 50%, 28px 100%, 18px 50%, 8px 100%);
+  }
+
+  :global(html[data-skin="nocturne"]) .card {
+    position: relative;
+    overflow: hidden;
+    border-color: color-mix(in srgb, var(--color-accent) 22%, var(--color-rule));
+    background:
+      linear-gradient(135deg, rgba(255, 55, 111, 0.055), transparent 44%),
+      var(--color-bg-elevated);
+    box-shadow: var(--shadow-md);
+    clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    transition:
+      border-color var(--duration-fast) var(--ease-smooth),
+      box-shadow var(--duration-fast) var(--ease-smooth),
+      transform var(--duration-fast) var(--ease-smooth);
+  }
+
+  :global(html[data-skin="nocturne"]) .card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 56px;
+    height: 56px;
+    pointer-events: none;
+    background: linear-gradient(135deg, transparent 47%, rgba(255, 55, 111, 0.4) 48% 52%, rgba(88, 21, 47, 0.68) 53%);
+    clip-path: polygon(100% 0, 100% 100%, 0 0);
+  }
+
+  :global(html[data-skin="nocturne"]) .card:hover {
+    transform: translate(-2px, -4px);
+    border-color: color-mix(in srgb, var(--color-accent) 58%, transparent);
+    box-shadow: var(--shadow-lg);
+  }
+
+  :global(html[data-skin="nocturne"]) .card__name {
+    font-family: var(--font-body);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+  }
+
+  :global(html[data-skin="nocturne"]) .card__tag {
+    color: var(--color-ink-secondary);
+    border-color: color-mix(in srgb, var(--color-accent) 22%, var(--color-rule));
+    background: rgba(255, 55, 111, 0.055);
+    clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+  }
+
+  :global(html[data-skin="nocturne"]) .card__links {
+    border-top-color: color-mix(in srgb, var(--color-accent) 20%, var(--color-rule));
+    background: rgba(9, 11, 24, 0.35);
+  }
+
+  :global(html[data-skin="nocturne"]) .card__link {
+    font-family: var(--font-mono);
+  }
+
   /* ─── Responsive ─── */
 
   @media (max-width: 640px) {
@@ -282,6 +425,29 @@ const course = projects.filter((p) => p.category === "course");
 
     .projects__grid {
       grid-template-columns: 1fr;
+    }
+
+    :global(html[data-skin="nocturne"]) .projects__header {
+      min-height: 350px;
+      padding: var(--space-8) var(--space-6);
+      background-image:
+        linear-gradient(90deg, rgba(8, 9, 21, 0.98) 0%, rgba(8, 9, 21, 0.88) 56%, rgba(8, 9, 21, 0.36) 100%),
+        url("/images/themes/crimson-nocturne/projects-hero.webp");
+      background-position: 60% center;
+    }
+
+    :global(html[data-skin="nocturne"]) .projects__eyebrow,
+    :global(html[data-skin="nocturne"]) .projects__title,
+    :global(html[data-skin="nocturne"]) .projects__desc {
+      max-width: 78%;
+    }
+
+    :global(html[data-skin="nocturne"]) .projects__title {
+      font-size: clamp(2.8rem, 15vw, 4.25rem);
+    }
+
+    :global(html[data-skin="nocturne"]) .projects__desc {
+      font-size: var(--text-sm);
     }
   }
 </style>

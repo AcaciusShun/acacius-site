@@ -20,75 +20,141 @@ const timeline = [
 <PageLayout title="About" description="Builder, writer, and systems designer.">
   <section class="about container">
     <header class="about__header">
-      <p class="about__eyebrow">About</p>
-      <h1 class="about__title">Somlar</h1>
+      <div class="about__header-copy">
+        <p class="about__eyebrow">About</p>
+        <h1 class="about__title">Somlar</h1>
+        <p class="about__lead">
+          Builder, writer, and systems designer.
+        </p>
+      </div>
+
+      <div class="about__ornament" aria-hidden="true">
+        <svg viewBox="0 0 560 360" preserveAspectRatio="xMidYMid meet" focusable="false">
+          <defs>
+            <mask id="about-corrosion-mask" maskUnits="userSpaceOnUse">
+              <rect width="560" height="360" fill="white" />
+              <g fill="black">
+                <circle cx="328" cy="50" r="7" />
+                <circle cx="349" cy="69" r="3" />
+                <circle cx="385" cy="46" r="11" />
+                <circle cx="421" cy="74" r="5" />
+                <circle cx="468" cy="48" r="14" />
+                <circle cx="503" cy="87" r="6" />
+                <circle cx="535" cy="62" r="4" />
+                <circle cx="377" cy="112" r="4" />
+                <circle cx="433" cy="126" r="9" />
+                <circle cx="492" cy="144" r="3" />
+                <circle cx="524" cy="178" r="12" />
+                <circle cx="457" cy="191" r="5" />
+                <circle cx="410" cy="214" r="8" />
+                <circle cx="482" cy="245" r="10" />
+                <circle cx="536" cy="278" r="5" />
+                <path d="m355 87 19-9 12 11-14 14-23-3Z" />
+                <path d="m449 155 27-12 17 10-9 18-31 5Z" />
+                <path d="m432 262 21-8 16 14-12 13-27-5Z" />
+              </g>
+            </mask>
+          </defs>
+
+          <path
+            class="about__corrosion-plate"
+            mask="url(#about-corrosion-mask)"
+            d="M560 0H304c63 34 84 76 52 117-39 51-7 112 64 138 58 21 103 54 140 105Z"
+          />
+          <path
+            class="about__thorn-vine"
+            d="M548 24c-116 3-145 59-97 103 55 50 17 124-76 131-88 6-151-33-162-96-9-50 34-86 83-68 39 14 43 59 10 78-23 13-48 2-56-18"
+          />
+          <path
+            class="about__thorn-vine about__thorn-vine--inner"
+            d="M514 316c-52-47-97-51-137-19-31 25-71 25-105 4"
+          />
+          <g class="about__thorn-spikes">
+            <path d="m451 67-42-49 13 62Z" />
+            <path d="m465 126 61-34-45 55Z" />
+            <path d="m404 220 2 70-27-62Z" />
+            <path d="m296 238-54 49 29-64Z" />
+            <path d="m219 166-66-20 58-16Z" />
+            <path d="m348 298-18 43 39-31Z" />
+          </g>
+          <g class="about__corrosion-flecks">
+            <circle cx="336" cy="42" r="2" />
+            <circle cx="371" cy="82" r="3" />
+            <circle cx="403" cy="56" r="1.5" />
+            <circle cx="442" cy="98" r="2.5" />
+            <circle cx="487" cy="72" r="2" />
+            <circle cx="511" cy="132" r="3" />
+            <circle cx="462" cy="211" r="2" />
+            <circle cx="499" cy="267" r="2.5" />
+          </g>
+        </svg>
+      </div>
     </header>
 
-    <div class="about__content">
-      <p class="about__lead">
-        Builder, writer, and systems designer.
-      </p>
-      <p>
-        Working at the intersection of technology and narrative systems.
-        Building things that are useful, writing things that are honest,
-        and designing systems that last.
-      </p>
-      <p>
-        This site is a calm home for experiments, writing, and projects —
-        built to stay useful over time.
-      </p>
-    </div>
-
-    <!-- Skills -->
-    <div class="about__section">
-      <h2 class="about__section-title">Stack</h2>
-      <div class="skills">
-        {skills.map((group) => (
-          <>
-            <span class="skills__label">{group.group}</span>
-            <div class="skills__tags">
-              {group.items.map((item) => (
-                <span class="skills__tag">{item}</span>
-              ))}
-            </div>
-          </>
-        ))}
+    <div class="about__body">
+      <div class="about__content">
+        <p>
+          Working at the intersection of technology and narrative systems.
+          Building things that are useful, writing things that are honest,
+          and designing systems that last.
+        </p>
+        <p>
+          This site is a calm home for experiments, writing, and projects —
+          built to stay useful over time.
+        </p>
       </div>
-    </div>
 
-    <!-- Timeline -->
-    <div class="about__section">
-      <h2 class="about__section-title">Timeline</h2>
-      <ul class="tl">
-        {timeline.map((item) => (
-          <li class="tl__item">
-            <span class="tl__year">{item.year}</span>
-            <span class="tl__text">{item.text}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <!-- Skills -->
+      <div class="about__section">
+        <h2 class="about__section-title">Stack</h2>
+        <div class="skills">
+          {skills.map((group) => (
+            <>
+              <span class="skills__label">{group.group}</span>
+              <div class="skills__tags">
+                {group.items.map((item) => (
+                  <span class="skills__tag">{item}</span>
+                ))}
+              </div>
+            </>
+          ))}
+        </div>
+      </div>
 
-    <!-- Links -->
-    <div class="about__section">
-      <h2 class="about__section-title">Elsewhere</h2>
-      <div class="about__links">
-        <a href="https://github.com/AcaciusShun" class="about__link" target="_blank" rel="noopener">
-          <Icon name="simple-icons:github" />
-          <span>GitHub</span>
-        </a>
-        <a href="https://x.com/hey_akie" class="about__link" target="_blank" rel="noopener">
-          <Icon name="simple-icons:x" />
-          <span>X</span>
-        </a>
-        <a href="https://m.somincola.org/@acacius" class="about__link" target="_blank" rel="me noopener">
-          <Icon name="simple-icons:mastodon" />
-          <span>Mastodon</span>
-        </a>
-        <a href="mailto:contact@somlar.com" class="about__link">
-          <Icon name="lucide:mail" />
-          <span>Email</span>
-        </a>
+      <!-- Timeline -->
+      <div class="about__section">
+        <h2 class="about__section-title">Timeline</h2>
+        <ul class="tl">
+          {timeline.map((item) => (
+            <li class="tl__item">
+              <span class="tl__year">{item.year}</span>
+              <span class="tl__text">{item.text}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Links -->
+      <div class="about__section">
+        <h2 class="about__section-title">Elsewhere</h2>
+        <div class="about__links">
+          <a href="https://github.com/AcaciusShun" class="about__link" target="_blank" rel="noopener">
+            <Icon name="simple-icons:github" />
+            <span>GitHub</span>
+          </a>
+          <a href="https://x.com/hey_akie" class="about__link" target="_blank" rel="noopener">
+            <Icon name="simple-icons:x" />
+            <span>X</span>
+          </a>
+          <a href="https://m.somincola.org/@acacius" class="about__link" target="_blank" rel="me noopener">
+            <Icon name="simple-icons:mastodon" />
+            <span>Mastodon</span>
+          </a>
+          <a href="mailto:contact@somlar.com" class="about__link">
+            <Icon name="lucide:mail" />
+            <span>Email</span>
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -98,11 +164,25 @@ const timeline = [
   .about {
     padding-top: var(--space-16);
     padding-bottom: var(--space-16);
-    max-width: var(--prose-max);
   }
 
   .about__header {
+    position: relative;
+    max-width: var(--prose-max);
     margin-bottom: var(--space-8);
+  }
+
+  .about__header-copy {
+    position: relative;
+    z-index: 1;
+  }
+
+  .about__body {
+    max-width: var(--prose-max);
+  }
+
+  .about__ornament {
+    display: none;
   }
 
   .about__eyebrow {
@@ -133,6 +213,7 @@ const timeline = [
   }
 
   .about__lead {
+    margin: var(--space-6) 0 0;
     font-family: var(--font-display);
     font-size: var(--text-2xl);
     color: var(--color-ink);
@@ -252,6 +333,177 @@ const timeline = [
     height: 16px;
   }
 
+  /* ─── Crimson Nocturne ─── */
+
+  :global(html[data-skin="nocturne"]) .about__header {
+    isolation: isolate;
+    display: grid;
+    align-content: center;
+    max-width: none;
+    min-height: 360px;
+    padding: clamp(36px, 7vw, 82px);
+    overflow: hidden;
+    contain: paint;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 46%, transparent);
+    background:
+      linear-gradient(100deg, rgba(8, 9, 21, 0.99) 0 47%, rgba(8, 9, 21, 0.92) 64%, rgba(88, 21, 47, 0.5) 100%),
+      repeating-linear-gradient(-18deg, transparent 0 12px, rgba(255, 91, 139, 0.035) 12px 13px);
+    box-shadow: var(--shadow-lg);
+    clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  }
+
+  :global(html[data-skin="nocturne"]) .about__header::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    top: 16%;
+    bottom: 16%;
+    width: 4px;
+    background: linear-gradient(transparent, var(--color-accent), transparent);
+    box-shadow: 8px 0 24px rgba(255, 55, 111, 0.4);
+  }
+
+  :global(html[data-skin="nocturne"]) .about__header-copy {
+    max-width: 54%;
+  }
+
+  :global(html[data-skin="nocturne"]) .about__eyebrow {
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+  }
+
+  :global(html[data-skin="nocturne"]) .about__title {
+    font-size: clamp(3.6rem, 8vw, 6.8rem);
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -0.075em;
+    text-transform: uppercase;
+    text-shadow: 5px 5px 0 var(--color-nocturne-wine);
+    transform: skewX(-3deg);
+  }
+
+  :global(html[data-skin="nocturne"]) .about__lead {
+    max-width: 30ch;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-style: normal;
+    font-weight: 600;
+    color: var(--color-ink-secondary);
+  }
+
+  :global(html[data-skin="nocturne"]) .about__ornament {
+    position: absolute;
+    z-index: 0;
+    top: -2%;
+    right: -1%;
+    bottom: -2%;
+    display: block;
+    width: min(58%, 620px);
+    pointer-events: none;
+  }
+
+  :global(html[data-skin="nocturne"]) .about__ornament svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  :global(html[data-skin="nocturne"]) .about__corrosion-plate {
+    fill: rgba(88, 21, 47, 0.62);
+    transform-origin: 100% 50%;
+    animation: about-corrosion-in 680ms var(--ease-smooth) both;
+  }
+
+  :global(html[data-skin="nocturne"]) .about__thorn-vine {
+    fill: none;
+    stroke: rgba(255, 91, 139, 0.92);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 940;
+    stroke-dashoffset: 940;
+    animation: about-thorn-spread 980ms var(--ease-smooth) 120ms forwards;
+  }
+
+  :global(html[data-skin="nocturne"]) .about__thorn-vine--inner {
+    stroke-width: 2.5;
+    stroke: rgba(160, 62, 117, 0.8);
+    animation-delay: 300ms;
+  }
+
+  :global(html[data-skin="nocturne"]) .about__thorn-spikes {
+    fill: rgba(255, 55, 111, 0.88);
+    opacity: 0;
+    transform-origin: center;
+    animation: about-spikes-in 380ms var(--ease-bounce) 560ms forwards;
+  }
+
+  :global(html[data-skin="nocturne"]) .about__corrosion-flecks {
+    fill: rgba(242, 238, 223, 0.55);
+    opacity: 0;
+    animation: about-flecks-in 420ms var(--ease-smooth) 700ms forwards;
+  }
+
+  :global(html[data-skin="nocturne"]) .about__body {
+    margin-top: var(--space-12);
+  }
+
+  :global(html[data-skin="nocturne"]) .about__section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-bottom: 0;
+    border-bottom: 0;
+    font-family: var(--font-body);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+
+  :global(html[data-skin="nocturne"]) .about__section-title::after {
+    content: "";
+    flex: 1;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-accent), transparent);
+    clip-path: polygon(0 50%, 8px 0, 18px 50%, 28px 0, 100% 50%, 28px 100%, 18px 50%, 8px 100%);
+  }
+
+  :global(html[data-skin="nocturne"]) .skills__tag,
+  :global(html[data-skin="nocturne"]) .about__link {
+    border-color: color-mix(in srgb, var(--color-accent) 24%, var(--color-rule));
+    background: rgba(255, 55, 111, 0.035);
+  }
+
+  :global(html[data-skin="nocturne"]) .skills__tag {
+    clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+  }
+
+  :global(html[data-skin="nocturne"]) .about__link {
+    border-radius: var(--radius-md);
+    box-shadow: 2px 2px 0 rgba(88, 21, 47, 0.34);
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  }
+
+  @keyframes about-thorn-spread {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes about-corrosion-in {
+    from { opacity: 0; transform: scaleX(0.76); }
+    to { opacity: 1; transform: scaleX(1); }
+  }
+
+  @keyframes about-spikes-in {
+    from { opacity: 0; transform: scale(0.72); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes about-flecks-in {
+    to { opacity: 1; }
+  }
+
   /* ─── Responsive ─── */
 
   @media (max-width: 640px) {
@@ -263,6 +515,30 @@ const timeline = [
       font-size: var(--text-3xl);
     }
 
+    :global(html[data-skin="nocturne"]) .about__header {
+      min-height: 330px;
+      padding: var(--space-8) var(--space-6);
+    }
+
+    :global(html[data-skin="nocturne"]) .about__header-copy {
+      max-width: 76%;
+    }
+
+    :global(html[data-skin="nocturne"]) .about__title {
+      font-size: clamp(2.9rem, 16vw, 4.25rem);
+    }
+
+    :global(html[data-skin="nocturne"]) .about__lead {
+      max-width: 24ch;
+      font-size: var(--text-sm);
+    }
+
+    :global(html[data-skin="nocturne"]) .about__ornament {
+      right: -18%;
+      width: 82%;
+      opacity: 0.65;
+    }
+
     .skills {
       grid-template-columns: 1fr;
       gap: var(--space-1);
@@ -270,6 +546,18 @@ const timeline = [
 
     .skills__tags {
       margin-bottom: var(--space-3);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html[data-skin="nocturne"]) .about__corrosion-plate,
+    :global(html[data-skin="nocturne"]) .about__thorn-vine,
+    :global(html[data-skin="nocturne"]) .about__thorn-spikes,
+    :global(html[data-skin="nocturne"]) .about__corrosion-flecks {
+      animation: none;
+      opacity: 1;
+      stroke-dashoffset: 0;
+      transform: none;
     }
   }
 </style>

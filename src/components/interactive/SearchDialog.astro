@@ -138,6 +138,12 @@
     border-color: var(--color-accent);
   }
 
+  :global(html[data-skin="nocturne"]) .search-trigger {
+    border-color: color-mix(in srgb, var(--color-accent) 24%, var(--color-rule));
+    background: rgba(255, 55, 111, 0.04);
+    clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+  }
+
   /* ─── Dialog ─── */
 
   .search-dialog {
@@ -158,6 +164,15 @@
   .search-dialog::backdrop {
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
+  }
+
+  :global(html[data-skin="nocturne"]) .search-dialog {
+    border-color: color-mix(in srgb, var(--color-accent) 48%, transparent);
+    background:
+      linear-gradient(135deg, rgba(255, 55, 111, 0.07), transparent 45%),
+      var(--color-bg);
+    box-shadow: var(--shadow-lg);
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
   }
 
   .search-dialog__inner {
